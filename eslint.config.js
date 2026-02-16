@@ -1,14 +1,18 @@
+// For more info, see https://github.com/storybookjs/eslint-plugin-storybook#configuration-flat-config-format
 import js from "@eslint/js";
 import reactDom from "eslint-plugin-react-dom";
 import reactHooks from "eslint-plugin-react-hooks";
 import reactRefresh from "eslint-plugin-react-refresh";
 import reactX from "eslint-plugin-react-x";
+import storybook from "eslint-plugin-storybook";
 import { defineConfig, globalIgnores } from "eslint/config";
 import globals from "globals";
 import tseslint from "typescript-eslint";
 
 export default defineConfig([
   globalIgnores(["dist"]),
+  globalIgnores(["!.storybook"], "Include Storybook directory"),
+  ...storybook.configs["flat/recommended"],
   {
     files: ["**/*.{ts,tsx}"],
     extends: [
