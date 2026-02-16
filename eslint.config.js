@@ -10,8 +10,8 @@ import globals from "globals";
 import tseslint from "typescript-eslint";
 
 export default defineConfig([
-  globalIgnores(["dist"]),
-  globalIgnores(["!.storybook"], "Include Storybook directory"),
+  globalIgnores(["dist", ".storybook"]),
+  reactHooks.configs.flat["recommended-latest"],
   ...storybook.configs["flat/recommended"],
   {
     files: ["**/*.{ts,tsx}"],
@@ -20,7 +20,6 @@ export default defineConfig([
       tseslint.configs.recommendedTypeChecked,
       tseslint.configs.stylisticTypeChecked,
       reactDom.configs.recommended,
-      reactHooks.configs["recommended-latest"],
       reactRefresh.configs.vite,
       reactX.configs["recommended-typescript"],
     ],

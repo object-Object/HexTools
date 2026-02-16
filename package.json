@@ -7,7 +7,9 @@
     "build": "tsc -b && vite build",
     "build-storybook": "storybook build",
     "dev": "vite",
-    "lint": "eslint .",
+    "lint": "yarn lint:eslint && yarn lint:prettier",
+    "lint:eslint": "eslint .",
+    "lint:prettier": "prettier . --check",
     "preview": "vite preview",
     "storybook": "storybook dev -p 6006"
   },
