@@ -2,5 +2,8 @@
   "experimentalOperatorPosition": "start",
   "importOrder": ["^[./]"],
   "importOrderSeparation": true,
-  "plugins": ["@trivago/prettier-plugin-sort-imports"]
+  "plugins": [
+    "prettier-plugin-packagejson",
+    "@trivago/prettier-plugin-sort-imports"
+  ]
 }
