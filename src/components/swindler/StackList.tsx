@@ -10,25 +10,26 @@ import {
   replaceIndex,
   replaceIndexFlat,
 } from "../../utils/arrays";
-import type { SetState } from "../../utils/types";
 import StackIota, { type StackIotaData } from "./StackIota";
 
 export interface StackListProps {
   items: StackIotaData[];
-  onItemsChange: SetState<StackIotaData[]>;
+  onItemsChange: (items: StackIotaData[]) => unknown;
+  allowInsert?: boolean;
   mirrored?: boolean;
 }
 
 export default function StackList({
   items,
   onItemsChange,
+  allowInsert,
   mirrored,
 }: StackListProps) {
   return (
     <div>
       <DragDropProvider
         onDragEnd={(event) => {
-          onItemsChange((items) => move(items, event));
+          onItemsChange(move(items, event));
         }}
         modifiers={[
           RestrictToElement.configure({
@@ -53,32 +54,37 @@ export default function StackList({
                 );
               }}
               onInsertBelow={() => {
-                onItemsChange(
-                  replaceIndexFlat(items, index, (current) => [
-                    current,
-                    { id: getNextId(items), value: "" },
-                  ]),
-                );
+                if (allowInsert) {
+                  onItemsChange(
+                    replaceIndexFlat(items, index, (current) => [
+                      current,
+                      { id: getNextId(items), value: "" },
+                    ]),
+                  );
+                }
               }}
               onRemove={() => {
-                if (items.length > 1) {
+                if (allowInsert && items.length > 1) {
                   onItemsChange(removeIndex(items, index));
                 }
               }}
               mirrored={mirrored}
+              autoFocus={allowInsert}
             />
           ))}
         </Stack>
-        <ActionIcon
-          mt="sm"
-          display="block"
-          ml={mirrored ? "auto" : undefined}
-          onClick={() => {
-            onItemsChange([...items, { id: getNextId(items), value: "" }]);
-          }}
-        >
-          <IconPlus />
-        </ActionIcon>
+        {allowInsert && (
+          <ActionIcon
+            mt="sm"
+            display="block"
+            ml={mirrored ? "auto" : undefined}
+            onClick={() => {
+              onItemsChange([...items, { id: getNextId(items), value: "" }]);
+            }}
+          >
+            <IconPlus />
+          </ActionIcon>
+        )}
       </DragDropProvider>
     </div>
   );

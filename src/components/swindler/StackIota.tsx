@@ -13,6 +13,7 @@ export interface StackIotaProps extends StackIotaData {
   onInsertBelow: () => unknown;
   onRemove: () => unknown;
   mirrored?: boolean;
+  autoFocus?: boolean;
 }
 
 export default function StackIota({
@@ -23,13 +24,14 @@ export default function StackIota({
   onInsertBelow,
   onRemove,
   mirrored,
+  autoFocus,
 }: StackIotaProps) {
   const { ref, handleRef, isDragging } = useSortable({ id, index });
 
   const grip = (
     <IconGripVertical
       ref={handleRef}
-      style={{ cursor: isDragging ? "grabbing" : "grab" }}
+      style={{ cursor: isDragging ? "grabbing" : "grab", flexShrink: 0 }}
     />
   );
 
@@ -50,7 +52,7 @@ export default function StackIota({
           }
         }}
         style={{ flexGrow: 1 }}
-        autoFocus={value === ""}
+        autoFocus={autoFocus && value === ""}
       />
       {mirrored && grip}
     </Group>

@@ -17,6 +17,9 @@ function Wrapper(props: WrapperProps) {
 
 const meta = {
   component: Wrapper,
+  args: {
+    allowInsert: true,
+  },
 } satisfies Meta<typeof Wrapper>;
 export default meta;
 
