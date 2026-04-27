@@ -1,5 +1,5 @@
 {
-  "[javascript][typescript][html][css][json][jsonc][javascriptreact][typescriptreact][mdx][postcss]": {
+  "[javascript][typescript][html][css][json][jsonc][javascriptreact][typescriptreact][mdx][postcss][snippets]": {
     "editor.defaultFormatter": "esbenp.prettier-vscode",
     "editor.formatOnSave": true,
     "editor.tabSize": 2

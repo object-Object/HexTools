@@ -1,20 +1,20 @@
 {
-    "Storybook Story": {
-        "prefix": "story",
-        "scope": "typescriptreact",
-        "body": [
-            "import type { Meta, StoryObj } from \"@storybook/react-vite\";",
-            "",
-            "import $1 from \"./$1\";",
-            "",
-            "const meta = {",
-            "  component: $1,",
-            "} satisfies Meta<typeof $1>;",
-            "export default meta;",
-            "",
-            "type Story = StoryObj<typeof meta>;",
-            "",
-            "export const Default: Story = {};",
-        ]
-    }
+  "Storybook Story": {
+    "prefix": "story",
+    "scope": "typescriptreact",
+    "body": [
+      "import type { Meta, StoryObj } from \"@storybook/react-vite\";",
+      "",
+      "import $1 from \"./$1\";",
+      "",
+      "const meta = {",
+      "  component: $1,",
+      "} satisfies Meta<typeof $1>;",
+      "export default meta;",
+      "",
+      "type Story = StoryObj<typeof meta>;",
+      "",
+      "export const Default: Story = {};",
+    ],
+  },
 }
