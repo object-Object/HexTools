@@ -2,13 +2,12 @@ import { RestrictToElement } from "@dnd-kit/dom/modifiers";
 import { move } from "@dnd-kit/helpers";
 import { DragDropProvider } from "@dnd-kit/react";
 import { Stack } from "@mantine/core";
-import { useRef, useState } from "react";
+import { useState } from "react";
 
 import StackIota from "./StackIota";
 
 export default function StackList() {
   const [items, setItems] = useState([0, 1, 2, 3]);
-  const stackRef = useRef<HTMLDivElement>(null);
 
   return (
     <DragDropProvider
@@ -23,7 +22,7 @@ export default function StackList() {
         }),
       ]}
     >
-      <Stack ref={stackRef}>
+      <Stack>
         {items.map((id, index) => (
           <StackIota key={id} id={id} index={index} />
         ))}
