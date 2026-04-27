@@ -1,14 +1,10 @@
 import type { Meta, StoryObj } from "@storybook/react-vite";
 
-import StackIota from "./StackIota";
+import StackList from "./StackList";
 
 const meta = {
-  component: StackIota,
-  args: {
-    id: 0,
-    index: 0,
-  },
-} satisfies Meta<typeof StackIota>;
+  component: StackList,
+} satisfies Meta<typeof StackList>;
 export default meta;
 
 type Story = StoryObj<typeof meta>;

@@ -17,7 +17,9 @@
     "vite": "^8.0.0-beta.13"
   },
   "dependencies": {
-    "@dnd-kit/react": "^0.3.0",
+    "@dnd-kit/dom": "^0.4.0",
+    "@dnd-kit/helpers": "^0.4.0",
+    "@dnd-kit/react": "^0.4.0",
     "@mantine/core": "^8.3.15",
     "@mantine/hooks": "^8.3.15",
     "@tabler/icons-react": "^3.36.1",
