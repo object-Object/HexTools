@@ -1,0 +1,64 @@
+import type { Meta, StoryObj } from "@storybook/react-vite";
+import { mat4 } from "gl-matrix";
+import { useEffect, useRef } from "react";
+
+import { BufferBuilder } from "../../render/buffer";
+import {
+  loadPositionColorShader,
+  usePositionColorShader,
+} from "../../render/shaders";
+import { drawSpot } from "../../render/staffGrid/renderLib";
+
+function RenderLibStory() {
+  const ref = useRef<HTMLCanvasElement>(null);
+
+  useEffect(() => {
+    if (!ref.current) {
+      throw new Error("Ref not loaded");
+    }
+
+    const gl = ref.current.getContext("webgl2");
+    if (!gl) {
+      throw new Error("WebGL2 not supported :(");
+    }
+
+    gl.clearColor(1, 1, 1, 1);
+    gl.clearDepth(1);
+    gl.enable(gl.DEPTH_TEST);
+    gl.depthFunc(gl.LEQUAL);
+    gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
+
+    const vbo = gl.createBuffer();
+    gl.bindBuffer(gl.ARRAY_BUFFER, vbo);
+
+    const program = loadPositionColorShader(gl);
+    usePositionColorShader({ gl, program, width: 640, height: 480 });
+
+    const buf = new BufferBuilder();
+    drawSpot({
+      buf,
+      mat: mat4.create(),
+      point: [320, 240],
+      radius: 64,
+      r: 0,
+      g: 0,
+      b: 1,
+      a: 1,
+    });
+    gl.bufferData(gl.ARRAY_BUFFER, buf.buffer.buffer, gl.STATIC_DRAW);
+
+    console.log(buf.buffer);
+    gl.drawArrays(gl.TRIANGLE_FAN, 0, buf.vertices);
+  }, []);
+
+  return <canvas ref={ref} width="640" height="480" />;
+}
+
+const meta = {
+  component: RenderLibStory,
+} satisfies Meta<typeof RenderLibStory>;
+export default meta;
+
+type Story = StoryObj<typeof meta>;
+
+export const Default: Story = {};
