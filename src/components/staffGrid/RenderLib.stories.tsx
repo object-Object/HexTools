@@ -1,5 +1,5 @@
 import type { Meta, StoryObj } from "@storybook/react-vite";
-import { Mat4, Vec2 } from "gl-matrix";
+import { Mat4 } from "gl-matrix";
 import { useEffect, useRef } from "react";
 
 import { BufferBuilder } from "../../render/buffer";
@@ -7,7 +7,7 @@ import {
   loadPositionColorShader,
   enablePositionColorShader,
 } from "../../render/shaders";
-import { drawSpot } from "../../render/staffGrid/renderLib";
+import { drawLineSeq, drawSpot } from "../../render/staffGrid/renderLib";
 
 function RenderLibStory() {
   const ref = useRef<HTMLCanvasElement>(null);
@@ -35,15 +35,32 @@ function RenderLibStory() {
     enablePositionColorShader({ gl, program, width: 640, height: 480 });
 
     const buf = new BufferBuilder(gl);
+
     drawSpot({
       buf,
       mat: new Mat4(),
-      point: new Vec2(320, 240),
+      point: [320, 240],
       radius: 64,
       r: 0,
       g: 0,
       b: 1,
       a: 1,
+    });
+
+    drawLineSeq({
+      buf,
+      mat: new Mat4(),
+      points: [
+        [50, 50],
+        [100, 100],
+        [50, 100],
+        [150, 200],
+      ],
+      width: 8,
+      z: 1,
+      tail: [0, 1, 0, 1],
+      head: [0, 0, 1],
+      isCtrlDown: true,
     });
   }, []);
 

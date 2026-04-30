@@ -1,8 +1,184 @@
-import { Mat4, Vec2 } from "gl-matrix";
+import {
+  Vec2,
+  Vec3,
+  type Mat4Like,
+  type Vec2Like,
+  type Vec3Like,
+  type Vec4Like,
+} from "gl-matrix";
+import _ from "lodash";
 
+import { lerp } from "../../utils/math";
 import type { BufferBuilder } from "../buffer";
 
 // https://github.com/FallingColors/HexMod/blob/88f86d96f4e94473de10ca76b5d9ef34fca96c5a/Common/src/main/java/at/petrak/hexcasting/client/render/RenderLib.kt
+
+export function drawLineSeq({
+  buf,
+  mat,
+  points,
+  width,
+  z,
+  tail,
+  head,
+  isCtrlDown,
+}: {
+  buf: BufferBuilder;
+  mat: Mat4Like;
+  points: Vec2Like[];
+  width: number;
+  z: number;
+  tail: Vec4Like;
+  head: Vec3Like;
+  isCtrlDown: boolean;
+}) {
+  if (points.length <= 1) return;
+
+  const [r1, g1, b1, a] = tail;
+  const [r2, g2, b2] = isCtrlDown ? head : tail;
+
+  const n = points.length;
+  const joinAngles = new Float32Array(n);
+  const joinOffsets = new Float32Array(n);
+  for (let i = 2; i < n; i++) {
+    const p0 = points[i - 2];
+    const p2 = points[i];
+    const p1 = points[i - 1];
+    const prev = Vec2.clone(p1).sub(p0);
+    const next = Vec2.clone(p2).sub(p1);
+    const angle = Math.atan2(
+      prev[0] * next[1] - prev[1] * next[0],
+      prev[0] * next[0] + prev[1] * next[1],
+    );
+    joinAngles[i - 1] = angle;
+    const clamp = Math.min(prev.mag, next.mag) / (width * 0.5);
+    joinOffsets[i - 1] = _.clamp(
+      Math.sin(angle) / (1 + Math.cos(angle)),
+      -clamp,
+      clamp,
+    );
+  }
+
+  function vertex(color: Vec3Like, pos: Vec2Like) {
+    buf.vertex(mat, pos[0], pos[1], z).color(color[0], color[1], color[2], a);
+  }
+
+  buf.begin(buf.gl.TRIANGLES);
+  for (let i = 0; i < points.length - 1; i++) {
+    const p1 = points[i];
+    const p2 = points[i + 1];
+
+    const tangent = Vec2.clone(p2)
+      .sub(p1)
+      .normalize()
+      .scale(width * 0.5);
+    const normal = new Vec2(-tangent.y, tangent.x);
+
+    function color(time: number) {
+      return new Vec3(
+        lerp(time, r1, r2),
+        lerp(time, g1, g2),
+        lerp(time, b1, b2),
+      );
+    }
+
+    const color1 = color(i / n);
+    const color2 = color((i + 1) / n);
+    const jlow = joinOffsets[i];
+    const jhigh = joinOffsets[i + 1];
+
+    const p1Down = Vec2.clone(p1)
+      .add(Vec2.clone(tangent).scale(Math.max(0, jlow)))
+      .add(normal);
+    const p1Up = Vec2.clone(p1)
+      .add(Vec2.clone(tangent).scale(Math.max(0, -jlow)))
+      .sub(normal);
+    const p2Down = Vec2.clone(p2)
+      .sub(Vec2.clone(tangent).scale(Math.max(0, jhigh)))
+      .add(normal);
+    const p2Up = Vec2.clone(p2)
+      .sub(Vec2.clone(tangent).scale(Math.max(0, -jhigh)))
+      .sub(normal);
+
+    vertex(color1, p1Down);
+    vertex(color1, p1);
+    vertex(color1, p1Up);
+
+    vertex(color1, p1Down);
+    vertex(color1, p1Up);
+    vertex(color2, p2Up);
+
+    vertex(color1, p1Down);
+    vertex(color2, p2Up);
+    vertex(color2, p2);
+
+    vertex(color1, p1Down);
+    vertex(color2, p2);
+    vertex(color2, p2Down);
+
+    if (i > 0) {
+      const sangle = joinAngles[i];
+      const angle = Math.abs(sangle);
+      const rnormal = Vec2.clone(normal).negate();
+      const joinSteps = Math.ceil((angle * 180) / (CAP_THETA * Math.PI));
+      if (joinSteps < 1) {
+        continue;
+      }
+
+      if (sangle < 0) {
+        let prevVert = new Vec2(p1[0] - rnormal.x, p1[1] - rnormal.y);
+        for (let j = 1; j <= joinSteps; j++) {
+          const fan = rotate(rnormal, -sangle * (j / joinSteps));
+          const fanShift = new Vec2(p1[0] - fan.x, p1[1] - fan.y);
+
+          vertex(color1, p1);
+          vertex(color1, prevVert);
+          vertex(color1, fanShift);
+          prevVert = fanShift;
+        }
+      } else {
+        const startFan = rotate(normal, -sangle);
+        let prevVert = new Vec2(p1[0] - startFan.x, p1[1] - startFan.y);
+        for (let j = joinSteps - 1; j >= 0; j--) {
+          const fan = rotate(normal, -sangle * (j / joinSteps));
+          const fanShift = new Vec2(p1[0] - fan.x, p1[1] - fan.y);
+
+          vertex(color1, p1);
+          vertex(color1, prevVert);
+          vertex(color1, fanShift);
+          prevVert = fanShift;
+        }
+      }
+    }
+  }
+  buf.end();
+
+  function drawCaps(color: Vec3Like, point: Vec2Like, prev: Vec2Like) {
+    const tangent = Vec2.clone(point)
+      .sub(prev)
+      .normalize()
+      .scale(0.5 * width);
+    const normal = new Vec2(-tangent.y, tangent.x);
+    const joinSteps = Math.ceil(180 / CAP_THETA);
+    buf.begin(buf.gl.TRIANGLE_FAN);
+    vertex(color, point);
+    for (let j = joinSteps; j >= 0; j--) {
+      const fan = rotate(normal, -Math.PI * (j / joinSteps));
+      buf
+        .vertex(mat, point[0] + fan[0], point[1] + fan[1], z)
+        .color(color[0], color[1], color[2], a);
+    }
+    buf.end();
+  }
+  drawCaps(new Vec3(r1, g1, b1), points[0], points[1]);
+  drawCaps(new Vec3(r2, g2, b2), points[n - 1], points[n - 2]);
+}
+
+function rotate(vec: Vec2, theta: number): Vec2 {
+  const cos = Math.cos(theta);
+  const sin = Math.sin(theta);
+  return new Vec2(vec.x * cos - vec.y * sin, vec.y * cos + vec.x * sin);
+}
 
 export function drawSpot({
   buf,
@@ -15,8 +191,8 @@ export function drawSpot({
   a,
 }: {
   buf: BufferBuilder;
-  mat: Mat4;
-  point: Vec2;
+  mat: Mat4Like;
+  point: Vec2Like;
   radius: number;
   r: number;
   g: number;
@@ -25,15 +201,17 @@ export function drawSpot({
 }) {
   buf.begin(buf.gl.TRIANGLE_FAN);
 
-  buf.vertex(mat, point.x, point.y, 1).color(r, g, b, a);
+  buf.vertex(mat, point[0], point[1], 1).color(r, g, b, a);
 
   const fracOfCircle = 6;
   for (let i = 0; i <= fracOfCircle; i++) {
     const theta = (i / fracOfCircle) * Math.PI * 2;
-    const rx = Math.cos(theta) * radius + point.x;
-    const ry = Math.sin(theta) * radius + point.y;
+    const rx = Math.cos(theta) * radius + point[0];
+    const ry = Math.sin(theta) * radius + point[1];
     buf.vertex(mat, rx, ry, 1).color(r, g, b, a);
   }
 
   buf.end();
 }
+
+const CAP_THETA = 180 / 10;

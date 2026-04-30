@@ -1,4 +1,4 @@
-import { Vec2 } from "gl-matrix";
+import { Vec2, type Vec2Like } from "gl-matrix";
 
 import type { HexCoord } from "./hexMath";
 
@@ -11,9 +11,9 @@ export function coordToPx({
 }: {
   coord: HexCoord;
   size: number;
-  offset: Vec2;
+  offset: Vec2Like;
 }): Vec2 {
-  return new Vec2(sqrt3 * coord.q + (sqrt3 / 2) * coord.r, 1.5 * coord.r)
+  return new Vec2(SQRT_3 * coord.q + (SQRT_3 / 2) * coord.r, 1.5 * coord.r)
     .scale(size)
     .add(offset);
 }
@@ -23,12 +23,12 @@ export function pxToCoord({
   size,
   offset,
 }: {
-  px: Vec2;
+  px: Vec2Like;
   size: number;
-  offset: Vec2;
+  offset: Vec2Like;
 }): HexCoord {
-  const offsetted = Vec2.clone(px).add(Vec2.clone(offset).negate());
-  let qf = ((sqrt3 / 3) * offsetted[0] - 0.33333 * offsetted[1]) / size;
+  const offsetted = Vec2.clone(px).sub(offset);
+  let qf = ((SQRT_3 / 3) * offsetted[0] - 0.33333 * offsetted[1]) / size;
   let rf = (0.66666 * offsetted[1]) / size;
 
   const q = Math.round(qf);
@@ -40,4 +40,4 @@ export function pxToCoord({
     : { q, r: r + Math.round(rf + 0.5 * qf) };
 }
 
-const sqrt3 = 1.7320508;
+const SQRT_3 = 1.7320508;

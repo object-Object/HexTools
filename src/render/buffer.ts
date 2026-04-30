@@ -1,5 +1,5 @@
 import ByteBuffer from "bytebuffer";
-import { Vec4, Mat4 } from "gl-matrix";
+import { Vec4, type Mat4Like } from "gl-matrix";
 
 export class BufferBuilder {
   gl: WebGL2RenderingContext;
@@ -30,7 +30,7 @@ export class BufferBuilder {
     return this;
   }
 
-  vertex(mat: Mat4, x: number, y: number, z: number): this {
+  vertex(mat: Mat4Like, x: number, y: number, z: number): this {
     const vec = new Vec4(x, y, z, 1);
     Vec4.transformMat4(vec, vec, mat);
     this.buffer.writeFloat32(vec.x);

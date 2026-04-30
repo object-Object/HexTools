@@ -69,7 +69,7 @@ export class GuiSpellcasting {
     const radius = 3;
     for (const dotCoord of HexCoord.rangeAround(mouseCoord, radius)) {
       const dotPx = this.coordToPx(dotCoord);
-      const delta = Vec2.clone(dotPx).add(Vec2.clone(mousePos).negate()).mag;
+      const delta = Vec2.clone(dotPx).sub(mousePos).mag;
       const scaledDist = _.clamp(
         1 - (delta - this.hexSize) / (radius * this.hexSize),
         0,
