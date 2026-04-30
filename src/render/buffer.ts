@@ -2,10 +2,12 @@ import ByteBuffer from "bytebuffer";
 import { vec4, mat4 } from "gl-matrix";
 
 export class BufferBuilder {
+  gl: WebGL2RenderingContext;
   buffer: ByteBuffer;
   vertices = 0;
 
-  constructor() {
+  constructor(gl: WebGL2RenderingContext) {
+    this.gl = gl;
     this.buffer = new ByteBuffer(
       ByteBuffer.DEFAULT_CAPACITY,
       ByteBuffer.LITTLE_ENDIAN,
@@ -19,7 +21,10 @@ export class BufferBuilder {
   }
 
   end(): this {
+    const gl = this.gl;
     this.buffer.flip();
+    gl.bufferData(gl.ARRAY_BUFFER, this.buffer.buffer, gl.STATIC_DRAW);
+    gl.drawArrays(gl.TRIANGLE_FAN, 0, this.vertices);
     return this;
   }
 

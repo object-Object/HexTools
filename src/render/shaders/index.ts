@@ -12,8 +12,7 @@ export function loadPositionColorShader(gl: WebGL2RenderingContext) {
   });
 }
 
-// attributes: "Color"
-export function usePositionColorShader({
+export function enablePositionColorShader({
   gl,
   program,
   width,
@@ -29,7 +28,7 @@ export function usePositionColorShader({
   gl.uniformMatrix4fv(
     gl.getUniformLocation(program, "ModelViewMat"),
     false,
-    [1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1],
+    mat4.create(),
   );
 
   gl.uniformMatrix4fv(

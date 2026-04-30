@@ -5,7 +5,7 @@ import { useEffect, useRef } from "react";
 import { BufferBuilder } from "../../render/buffer";
 import {
   loadPositionColorShader,
-  usePositionColorShader,
+  enablePositionColorShader,
 } from "../../render/shaders";
 import { drawSpot } from "../../render/staffGrid/renderLib";
 
@@ -32,9 +32,9 @@ function RenderLibStory() {
     gl.bindBuffer(gl.ARRAY_BUFFER, vbo);
 
     const program = loadPositionColorShader(gl);
-    usePositionColorShader({ gl, program, width: 640, height: 480 });
+    enablePositionColorShader({ gl, program, width: 640, height: 480 });
 
-    const buf = new BufferBuilder();
+    const buf = new BufferBuilder(gl);
     drawSpot({
       buf,
       mat: mat4.create(),
@@ -45,10 +45,6 @@ function RenderLibStory() {
       b: 1,
       a: 1,
     });
-    gl.bufferData(gl.ARRAY_BUFFER, buf.buffer.buffer, gl.STATIC_DRAW);
-
-    console.log(buf.buffer);
-    gl.drawArrays(gl.TRIANGLE_FAN, 0, buf.vertices);
   }, []);
 
   return <canvas ref={ref} width="640" height="480" />;
