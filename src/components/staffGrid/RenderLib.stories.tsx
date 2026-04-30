@@ -59,7 +59,7 @@ function RenderLibStory() {
       width: 8,
       z: 1,
       tail: [0, 1, 0, 1],
-      head: [0, 0, 1],
+      head: [0, 0, 1, 1],
       isCtrlDown: true,
     });
   }, []);

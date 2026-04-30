@@ -10,6 +10,7 @@ import _ from "lodash";
 
 import { lerp } from "../../utils/math";
 import type { BufferBuilder } from "../buffer";
+import { HexCoord } from "./hexMath";
 
 // https://github.com/FallingColors/HexMod/blob/88f86d96f4e94473de10ca76b5d9ef34fca96c5a/Common/src/main/java/at/petrak/hexcasting/client/render/RenderLib.kt
 
@@ -29,7 +30,7 @@ export function drawLineSeq({
   width: number;
   z: number;
   tail: Vec4Like;
-  head: Vec3Like;
+  head: Vec4Like;
   isCtrlDown: boolean;
 }) {
   if (points.length <= 1) return;
@@ -180,6 +181,78 @@ function rotate(vec: Vec2, theta: number): Vec2 {
   return new Vec2(vec.x * cos - vec.y * sin, vec.y * cos + vec.x * sin);
 }
 
+export function drawPatternFromPoints({
+  buf,
+  mat,
+  points,
+  dupIndices,
+  drawLast,
+  tail,
+  head,
+  flowIrregular,
+  readabilityOffset,
+  lastSegmentLenProportion,
+  seed,
+  isCtrlDown,
+}: {
+  buf: BufferBuilder;
+  mat: Mat4Like;
+  points: Vec2Like[];
+  dupIndices: Set<number>;
+  drawLast: boolean;
+  tail: Vec4Like;
+  head: Vec4Like;
+  flowIrregular: number;
+  readabilityOffset: number;
+  lastSegmentLenProportion: number;
+  seed: number;
+  isCtrlDown: boolean;
+}) {
+  // TODO
+  const nodes = drawLast ? points : points.slice(0, -1);
+  drawLineSeq({ buf, mat, points, width: 5, z: 0, tail, head, isCtrlDown });
+  drawLineSeq({
+    buf,
+    mat,
+    points,
+    width: 2,
+    z: 1,
+    tail: screenCol(tail),
+    head: screenCol(head),
+    isCtrlDown,
+  });
+  for (const node of nodes) {
+    drawSpot({
+      buf,
+      mat,
+      point: node,
+      radius: 2,
+      r: dodge(head[0]),
+      g: dodge(head[1]),
+      b: dodge(head[2]),
+      a: head[3],
+    });
+  }
+}
+
+export function findDupIndices(pts: Iterable<HexCoord>): Set<number> {
+  const dedup = new Map<string, number>();
+  const found = new Set<number>();
+  let i = 0;
+  for (const pt of pts) {
+    const ptStr = HexCoord.toString(pt);
+    const ix = dedup.get(ptStr);
+    if (ix !== undefined) {
+      found.add(i);
+      found.add(ix);
+    } else {
+      dedup.set(ptStr, i);
+    }
+    i++;
+  }
+  return found;
+}
+
 export function drawSpot({
   buf,
   mat,
@@ -214,4 +287,18 @@ export function drawSpot({
   buf.end();
 }
 
+function screenCol(col: Vec4Like): Vec4Like {
+  const [r, g, b, a] = col;
+  return [screen(r), screen(g), screen(b), a];
+}
+
+function screen(n: number) {
+  return (n + 1) / 2;
+}
+
+function dodge(n: number) {
+  return n * 0.9;
+}
+
+export const DEFAULT_READABILITY_OFFSET = 0.2;
 const CAP_THETA = 180 / 10;

@@ -1,4 +1,4 @@
-import { mat4 } from "gl-matrix";
+import { Mat4 } from "gl-matrix";
 
 import positionColorFragment from "./position_color.fsh?raw";
 import positionColorVertex from "./position_color.vsh?raw";
@@ -28,13 +28,13 @@ export function enablePositionColorShader({
   gl.uniformMatrix4fv(
     gl.getUniformLocation(program, "ModelViewMat"),
     false,
-    mat4.create(),
+    new Mat4(),
   );
 
   gl.uniformMatrix4fv(
     gl.getUniformLocation(program, "ProjMat"),
     false,
-    mat4.ortho(mat4.create(), 0, width, height, 0, -100, 100),
+    Mat4.orthoNO(new Mat4(), 0, width, height, 0, -100, 100),
   );
 
   gl.uniform4f(gl.getUniformLocation(program, "ColorModulator"), 1, 1, 1, 1);
