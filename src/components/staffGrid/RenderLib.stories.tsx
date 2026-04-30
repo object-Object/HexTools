@@ -1,5 +1,5 @@
 import type { Meta, StoryObj } from "@storybook/react-vite";
-import { mat4 } from "gl-matrix";
+import { Mat4, Vec2 } from "gl-matrix";
 import { useEffect, useRef } from "react";
 
 import { BufferBuilder } from "../../render/buffer";
@@ -37,8 +37,8 @@ function RenderLibStory() {
     const buf = new BufferBuilder(gl);
     drawSpot({
       buf,
-      mat: mat4.create(),
-      point: [320, 240],
+      mat: new Mat4(),
+      point: new Vec2(320, 240),
       radius: 64,
       r: 0,
       g: 0,

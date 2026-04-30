@@ -1665,10 +1665,10 @@ git-hooks-list@^4.1.1:
   resolved "https://registry.yarnpkg.com/git-hooks-list/-/git-hooks-list-4.2.1.tgz#82b3ad119ec2da8a6d57228bd68d8e432afc418c"
   integrity sha512-WNvqJjOxxs/8ZP9+DWdwWJ7cDsd60NHf39XnD82pDVrKO5q7xfPqpkK6hwEAmBa/ZSEE4IOoR75EzbbIuwGlMw==
 
-gl-matrix@^3.4.4:
-  version "3.4.4"
-  resolved "https://registry.yarnpkg.com/gl-matrix/-/gl-matrix-3.4.4.tgz#7789ee4982f62c7a7af447ee488f3bd6b0c77003"
-  integrity sha512-latSnyDNt/8zYUB6VIJ6PCh2jBjJX6gnDsoCZ7LyW7GkqrD51EWwa9qCoGixj8YqBtETQK/xY7OmpTF8xz1DdQ==
+gl-matrix@^4.0.0-beta.2:
+  version "4.0.0-beta.2"
+  resolved "https://registry.yarnpkg.com/gl-matrix/-/gl-matrix-4.0.0-beta.2.tgz#04148276cd8f130b65d28c1e4e5caa0d947537e2"
+  integrity sha512-OF6IkQpMkF8p2CZF9EtzYZPlPaW3M41KMsgZGlTKmMv/nWaP6GMJi9V5tI+oPn8FG0io85Q5ZtKpCXP4u6YmDA==
 
 glob-parent@^6.0.2:
   version "6.0.2"

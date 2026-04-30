@@ -1,4 +1,4 @@
-import { mat4, vec2 } from "gl-matrix";
+import { Mat4, Vec2 } from "gl-matrix";
 
 import type { BufferBuilder } from "../buffer";
 
@@ -7,7 +7,7 @@ import type { BufferBuilder } from "../buffer";
 export function drawSpot({
   buf,
   mat,
-  point: [x, y],
+  point,
   radius,
   r,
   g,
@@ -15,23 +15,23 @@ export function drawSpot({
   a,
 }: {
   buf: BufferBuilder;
-  mat: mat4;
-  point: vec2;
+  mat: Mat4;
+  point: Vec2;
   radius: number;
   r: number;
   g: number;
   b: number;
   a: number;
 }) {
-  buf.start();
+  buf.begin(buf.gl.TRIANGLE_FAN);
 
-  buf.vertex(mat, x, y, 1).color(r, g, b, a);
+  buf.vertex(mat, point.x, point.y, 1).color(r, g, b, a);
 
   const fracOfCircle = 6;
   for (let i = 0; i <= fracOfCircle; i++) {
     const theta = (i / fracOfCircle) * Math.PI * 2;
-    const rx = Math.cos(theta) * radius + x;
-    const ry = Math.sin(theta) * radius + y;
+    const rx = Math.cos(theta) * radius + point.x;
+    const ry = Math.sin(theta) * radius + point.y;
     buf.vertex(mat, rx, ry, 1).color(r, g, b, a);
   }
 

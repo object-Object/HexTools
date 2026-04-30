@@ -1,4 +1,4 @@
-import { mat4, vec2 } from "gl-matrix";
+import { Mat4, Vec2 } from "gl-matrix";
 import _ from "lodash";
 
 import { lerp } from "../../utils/math";
@@ -62,20 +62,14 @@ export class GuiSpellcasting {
       height: this.height,
     });
 
-    const mat = mat4.create();
+    const mat = new Mat4();
 
-    const mousePos = vec2.fromValues(mouseX, mouseY);
+    const mousePos = new Vec2(mouseX, mouseY);
     const mouseCoord = this.pxToCoord(mousePos);
     const radius = 3;
     for (const dotCoord of HexCoord.rangeAround(mouseCoord, radius)) {
       const dotPx = this.coordToPx(dotCoord);
-      const delta = vec2.length(
-        vec2.add(
-          vec2.clone(dotPx),
-          dotPx,
-          vec2.negate(vec2.clone(mousePos), mousePos),
-        ),
-      );
+      const delta = Vec2.clone(dotPx).add(Vec2.clone(mousePos).negate()).mag;
       const scaledDist = _.clamp(
         1 - (delta - this.hexSize) / (radius * this.hexSize),
         0,
@@ -99,14 +93,14 @@ export class GuiSpellcasting {
   }
 
   get coordsOffset() {
-    return vec2.fromValues(this.width * 0.5, this.height * 0.5);
+    return new Vec2(this.width * 0.5, this.height * 0.5);
   }
 
   coordToPx(coord: HexCoord) {
     return coordToPx({ coord, size: this.hexSize, offset: this.coordsOffset });
   }
 
-  pxToCoord(px: vec2) {
+  pxToCoord(px: Vec2) {
     return pxToCoord({ px, size: this.hexSize, offset: this.coordsOffset });
   }
 }

@@ -1,9 +1,10 @@
 import ByteBuffer from "bytebuffer";
-import { vec4, mat4 } from "gl-matrix";
+import { Vec4, Mat4 } from "gl-matrix";
 
 export class BufferBuilder {
   gl: WebGL2RenderingContext;
   buffer: ByteBuffer;
+  mode: GLenum = 0;
   vertices = 0;
 
   constructor(gl: WebGL2RenderingContext) {
@@ -14,26 +15,27 @@ export class BufferBuilder {
     );
   }
 
-  start(): this {
+  begin(mode: GLenum): this {
     this.buffer.clear();
     this.vertices = 0;
+    this.mode = mode;
     return this;
   }
 
   end(): this {
     const gl = this.gl;
     this.buffer.flip();
-    gl.bufferData(gl.ARRAY_BUFFER, this.buffer.buffer, gl.STATIC_DRAW);
-    gl.drawArrays(gl.TRIANGLE_FAN, 0, this.vertices);
+    gl.bufferData(gl.ARRAY_BUFFER, this.buffer.buffer, gl.STREAM_DRAW);
+    gl.drawArrays(this.mode, 0, this.vertices);
     return this;
   }
 
-  vertex(mat: mat4, x: number, y: number, z: number): this {
-    const vec = vec4.fromValues(x, y, z, 1);
-    vec4.transformMat4(vec, vec, mat);
-    this.buffer.writeFloat32(vec[0]);
-    this.buffer.writeFloat32(vec[1]);
-    this.buffer.writeFloat32(vec[2]);
+  vertex(mat: Mat4, x: number, y: number, z: number): this {
+    const vec = new Vec4(x, y, z, 1);
+    Vec4.transformMat4(vec, vec, mat);
+    this.buffer.writeFloat32(vec.x);
+    this.buffer.writeFloat32(vec.y);
+    this.buffer.writeFloat32(vec.z);
     this.vertices++;
     return this;
   }
