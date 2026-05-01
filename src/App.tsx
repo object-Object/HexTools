@@ -7,7 +7,8 @@ import {
 } from "@mantine/core";
 import "@mantine/core/styles.css";
 import { useState } from "react";
-import { Link, Redirect, Route, Router, Switch, useLocation } from "wouter";
+import { Link, Redirect, Route, Router, Switch } from "wouter";
+import { useHashLocation } from "wouter/use-hash-location";
 
 import ColorSchemeButton from "./components/ColorSchemeButton";
 import StaffGrid from "./components/staffGrid/StaffGrid";
@@ -15,13 +16,12 @@ import SwindlerStacks from "./components/swindler/SwindlerStacks";
 import { mod } from "./utils/math";
 
 export default function App() {
-  const [location] = useLocation();
+  const [location] = useHashLocation();
   const [guiScale, setGuiScale] = useState(2);
-  console.log(location);
 
   return (
     <MantineProvider defaultColorScheme="dark">
-      <Router base="/HexTools">
+      <Router hook={useHashLocation}>
         <AppShell padding="md" header={{ height: 60 }}>
           <AppShell.Header>
             <Group h="100%" mx="sm" gap="sm" align="center">
