@@ -38,7 +38,7 @@ export class GuiSpellcasting {
     this.gl = gl;
     this.guiScale = guiScale;
 
-    gl.clearColor(0.6, 0.6, 0.6, 1);
+    gl.clearColor(0, 0, 0, 0);
     gl.clearDepth(1);
     gl.enable(gl.DEPTH_TEST);
     gl.depthFunc(gl.LEQUAL);
