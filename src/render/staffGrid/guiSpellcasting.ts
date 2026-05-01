@@ -19,13 +19,25 @@ import {
 
 // https://github.com/FallingColors/HexMod/blob/724c36bba6a97f97d16f95d16f7addb700e62443/Common/src/main/java/at/petrak/hexcasting/client/gui/GuiSpellcasting.kt
 export class GuiSpellcasting {
+  gl: WebGL2RenderingContext;
   shader: PositionColorShader;
   buf: BufferBuilder;
+  guiScale: number;
 
   private drawState: PatternDrawState = BETWEEN_PATTERNS;
   private usedSpots = new Set<string>();
+  private patterns: ResolvedPattern[] = [];
 
-  constructor(public gl: WebGL2RenderingContext) {
+  constructor({
+    gl,
+    guiScale,
+  }: {
+    gl: WebGL2RenderingContext;
+    guiScale: number;
+  }) {
+    this.gl = gl;
+    this.guiScale = guiScale;
+
     gl.clearColor(0.6, 0.6, 0.6, 1);
     gl.clearDepth(1);
     gl.enable(gl.DEPTH_TEST);
@@ -39,14 +51,22 @@ export class GuiSpellcasting {
   }
 
   get width() {
-    return this.gl.canvas.width;
+    return this.gl.canvas.width / this.guiScale;
   }
 
   get height() {
-    return this.gl.canvas.height;
+    return this.gl.canvas.height / this.guiScale;
   }
 
-  mouseClicked({ mouseX, mouseY }: MousePos) {
+  scaleMousePos({ mouseX, mouseY }: MousePos): MousePos {
+    return {
+      mouseX: mouseX / this.guiScale,
+      mouseY: mouseY / this.guiScale,
+    };
+  }
+
+  mouseClicked(mousePos: MousePos) {
+    const { mouseX, mouseY } = this.scaleMousePos(mousePos);
     const mx = _.clamp(mouseX, 0, this.width);
     const my = _.clamp(mouseY, 0, this.height);
     if (this.drawState.type === "betweenPatterns") {
@@ -57,7 +77,8 @@ export class GuiSpellcasting {
     }
   }
 
-  mouseDragged({ mouseX, mouseY }: MousePos) {
+  mouseDragged(mousePos: MousePos) {
+    const { mouseX, mouseY } = this.scaleMousePos(mousePos);
     const mx = _.clamp(mouseX, 0, this.width);
     const my = _.clamp(mouseY, 0, this.height);
 
@@ -124,14 +145,14 @@ export class GuiSpellcasting {
   }
 
   render({
-    mouseX,
-    mouseY,
     isCtrlDown,
     timestamp,
+    ...mousePos
   }: MousePos & {
     isCtrlDown: boolean;
     timestamp: DOMHighResTimeStamp;
   }) {
+    const { mouseX, mouseY } = this.scaleMousePos(mousePos);
     const { gl, buf } = this;
 
     gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
@@ -145,12 +166,12 @@ export class GuiSpellcasting {
 
     const mat = new Mat4();
 
-    const mousePos = new Vec2(mouseX, mouseY);
-    const mouseCoord = this.pxToCoord(mousePos);
+    const mouseVec = new Vec2(mouseX, mouseY);
+    const mouseCoord = this.pxToCoord(mouseVec);
     const radius = 3;
     for (const dotCoord of HexCoord.rangeAround(mouseCoord, radius)) {
       const dotPx = this.coordToPx(dotCoord);
-      const delta = Vec2.clone(dotPx).sub(mousePos).mag;
+      const delta = Vec2.clone(dotPx).sub(mouseVec).mag;
       const scaledDist = _.clamp(
         1 - (delta - this.hexSize) / (radius * this.hexSize),
         0,
@@ -182,7 +203,7 @@ export class GuiSpellcasting {
         }
       }
 
-      points.push(mousePos);
+      points.push(mouseVec);
       drawPatternFromPoints({
         buf,
         mat,
@@ -194,7 +215,7 @@ export class GuiSpellcasting {
         flowIrregular: 0.1,
         readabilityOffset: DEFAULT_READABILITY_OFFSET,
         lastSegmentLenProportion: 1,
-        seed: 0, // should be this.patterns.length
+        seed: this.patterns.length,
         timestamp,
         isCtrlDown,
       });
@@ -239,6 +260,11 @@ interface Drawing {
   start: HexCoord;
   current: HexCoord;
   wipPattern: HexPattern;
+}
+
+interface ResolvedPattern {
+  pattern: HexPattern;
+  origin: HexCoord;
 }
 
 const BETWEEN_PATTERNS: BetweenPatterns = { type: "betweenPatterns" };

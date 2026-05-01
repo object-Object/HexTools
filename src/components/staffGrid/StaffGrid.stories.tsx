@@ -4,6 +4,9 @@ import StaffGrid from "./StaffGrid";
 
 const meta = {
   component: StaffGrid,
+  args: {
+    guiScale: 1,
+  },
 } satisfies Meta<typeof StaffGrid>;
 export default meta;
 

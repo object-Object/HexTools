@@ -1,15 +1,20 @@
 import { useEffect, useRef, type PointerEventHandler } from "react";
 
+import { useOnMount } from "../../hooks/useOnMount";
 import { GuiSpellcasting } from "../../render/staffGrid/guiSpellcasting";
 
-export default function StaffGrid() {
+export interface StaffGridProps {
+  guiScale: number;
+}
+
+export default function StaffGrid({ guiScale }: StaffGridProps) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const guiRef = useRef<GuiSpellcasting>(null);
   const mouseXRef = useRef(0);
   const mouseYRef = useRef(0);
   const isCtrlDownRef = useRef(false);
 
-  useEffect(() => {
+  useOnMount(() => {
     if (!canvasRef.current) {
       throw new Error("Ref not loaded");
     }
@@ -20,12 +25,12 @@ export default function StaffGrid() {
       throw new Error("WebGL2 not supported :(");
     }
 
-    const gui = new GuiSpellcasting(gl);
+    const gui = new GuiSpellcasting({ gl, guiScale });
     guiRef.current = gui;
 
     let isMounted = true;
     const handleAnimationFrame = (timestamp: DOMHighResTimeStamp) => {
-      if (!isMounted) return;
+      if (!isMounted || !canvas.isConnected) return;
       maybeResizeCanvas(canvas, gl);
       gui.render({
         mouseX: mouseXRef.current,
@@ -40,7 +45,13 @@ export default function StaffGrid() {
     return () => {
       isMounted = false;
     };
-  }, []);
+  });
+
+  useEffect(() => {
+    if (guiRef.current) {
+      guiRef.current.guiScale = guiScale;
+    }
+  }, [guiScale]);
 
   const handlePointerDown: PointerEventHandler = () => {
     guiRef.current?.mouseClicked({
