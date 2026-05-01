@@ -13,19 +13,25 @@ export default function StaffGrid() {
       throw new Error("Ref not loaded");
     }
 
-    const gui = new GuiSpellcasting(canvasRef.current);
+    const canvas = canvasRef.current;
+    const gl = canvas.getContext("webgl2");
+    if (!gl) {
+      throw new Error("WebGL2 not supported :(");
+    }
+
+    const gui = new GuiSpellcasting(gl);
     guiRef.current = gui;
 
     let isMounted = true;
     const handleAnimationFrame = (timestamp: DOMHighResTimeStamp) => {
-      if (isMounted) {
-        gui.render({
-          mouseX: mouseXRef.current,
-          mouseY: mouseYRef.current,
-          timestamp,
-        });
-        requestAnimationFrame(handleAnimationFrame);
-      }
+      if (!isMounted) return;
+      maybeResizeCanvas(canvas, gl);
+      gui.render({
+        mouseX: mouseXRef.current,
+        mouseY: mouseYRef.current,
+        timestamp,
+      });
+      requestAnimationFrame(handleAnimationFrame);
     };
     requestAnimationFrame(handleAnimationFrame);
 
@@ -59,13 +65,36 @@ export default function StaffGrid() {
   };
 
   return (
-    <canvas
-      ref={canvasRef}
-      onPointerDown={handlePointerDown}
-      onPointerMove={handlePointerMove}
-      onPointerUp={handlePointerUp}
-      width="1024"
-      height="768"
-    />
+    <div
+      style={{
+        position: "absolute",
+        overflow: "hidden",
+        top: 0,
+        left: 0,
+        bottom: 0,
+        right: 0,
+      }}
+    >
+      <canvas
+        ref={canvasRef}
+        onPointerDown={handlePointerDown}
+        onPointerMove={handlePointerMove}
+        onPointerUp={handlePointerUp}
+        style={{ width: "100%", height: "100%", touchAction: "none" }}
+      />
+    </div>
   );
+}
+
+// https://webgl2fundamentals.org/webgl/lessons/webgl-resizing-the-canvas.html
+function maybeResizeCanvas(
+  canvas: HTMLCanvasElement,
+  gl: WebGL2RenderingContext,
+) {
+  const { clientWidth, clientHeight, width, height } = canvas;
+  if (width !== clientWidth || height !== clientHeight) {
+    canvas.width = clientWidth;
+    canvas.height = clientHeight;
+    gl.viewport(0, 0, canvas.width, canvas.height);
+  }
 }

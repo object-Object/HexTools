@@ -19,20 +19,13 @@ import {
 
 // https://github.com/FallingColors/HexMod/blob/724c36bba6a97f97d16f95d16f7addb700e62443/Common/src/main/java/at/petrak/hexcasting/client/gui/GuiSpellcasting.kt
 export class GuiSpellcasting {
-  canvas: HTMLCanvasElement;
-  gl: WebGL2RenderingContext;
   shader: PositionColorShader;
   buf: BufferBuilder;
 
   private drawState: PatternDrawState = BETWEEN_PATTERNS;
   private usedSpots = new Set<string>();
 
-  constructor(canvas: HTMLCanvasElement) {
-    const gl = canvas.getContext("webgl2");
-    if (!gl) {
-      throw new Error("WebGL2 not supported :(");
-    }
-
+  constructor(public gl: WebGL2RenderingContext) {
     gl.clearColor(0.6, 0.6, 0.6, 1);
     gl.clearDepth(1);
     gl.enable(gl.DEPTH_TEST);
@@ -41,18 +34,16 @@ export class GuiSpellcasting {
     const vbo = gl.createBuffer();
     gl.bindBuffer(gl.ARRAY_BUFFER, vbo);
 
-    this.canvas = canvas;
-    this.gl = gl;
     this.shader = loadPositionColorShader(gl);
     this.buf = new BufferBuilder(gl);
   }
 
   get width() {
-    return this.canvas.clientWidth;
+    return this.gl.canvas.width;
   }
 
   get height() {
-    return this.canvas.clientHeight;
+    return this.gl.canvas.height;
   }
 
   mouseClicked({ mouseX, mouseY }: MousePos) {
