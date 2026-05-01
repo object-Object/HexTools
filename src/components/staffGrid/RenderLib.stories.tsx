@@ -31,8 +31,8 @@ function RenderLibStory() {
     const vbo = gl.createBuffer();
     gl.bindBuffer(gl.ARRAY_BUFFER, vbo);
 
-    const program = loadPositionColorShader(gl);
-    enablePositionColorShader({ gl, program, width: 640, height: 480 });
+    const shader = loadPositionColorShader(gl);
+    enablePositionColorShader({ gl, shader, width: 640, height: 480 });
 
     const buf = new BufferBuilder(gl);
 

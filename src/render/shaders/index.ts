@@ -3,41 +3,60 @@ import { Mat4 } from "gl-matrix";
 import positionColorFragment from "./position_color.fsh?raw";
 import positionColorVertex from "./position_color.vsh?raw";
 
-// shh. don't tell Microsoft's lawyers. it's fine
-export function loadPositionColorShader(gl: WebGL2RenderingContext) {
-  return loadShaderProgram({
+interface Shader<UniformsT extends string, AttribsT extends string> {
+  program: WebGLProgram;
+  uniforms: Record<UniformsT, WebGLUniformLocation>;
+  attribs: Record<AttribsT, GLint>;
+}
+
+export interface PositionColorShader extends Shader<
+  "ModelViewMat" | "ProjMat" | "ColorModulator",
+  "Position" | "Color"
+> {}
+
+export function loadPositionColorShader(
+  gl: WebGL2RenderingContext,
+): PositionColorShader {
+  const program = loadShaderProgram({
     gl,
     vertex: positionColorVertex,
     fragment: positionColorFragment,
   });
+  return {
+    program,
+    uniforms: getUniformLocations(
+      gl,
+      program,
+      "ModelViewMat",
+      "ProjMat",
+      "ColorModulator",
+    ),
+    attribs: getAttribLocations(gl, program, "Position", "Color"),
+  };
 }
 
 export function enablePositionColorShader({
   gl,
-  program,
+  shader: { program, uniforms, attribs },
   width,
   height,
 }: {
   gl: WebGL2RenderingContext;
-  program: WebGLProgram;
+  shader: PositionColorShader;
   width: number;
   height: number;
 }) {
   gl.useProgram(program);
 
-  gl.uniformMatrix4fv(
-    gl.getUniformLocation(program, "ModelViewMat"),
-    false,
-    new Mat4(),
-  );
+  gl.uniformMatrix4fv(uniforms.ModelViewMat, false, new Mat4());
 
   gl.uniformMatrix4fv(
-    gl.getUniformLocation(program, "ProjMat"),
+    uniforms.ProjMat,
     false,
     Mat4.orthoNO(new Mat4(), 0, width, height, 0, -100, 100),
   );
 
-  gl.uniform4f(gl.getUniformLocation(program, "ColorModulator"), 1, 1, 1, 1);
+  gl.uniform4f(uniforms.ColorModulator, 1, 1, 1, 1);
 
   const positionSize = 3;
   const positionBytes = positionSize * 4;
@@ -45,24 +64,63 @@ export function enablePositionColorShader({
   const colorBytes = colorSize * 1;
   const stride = positionBytes + colorBytes;
 
-  const position = gl.getAttribLocation(program, "Position");
-  gl.vertexAttribPointer(position, positionSize, gl.FLOAT, false, stride, 0);
-  gl.enableVertexAttribArray(position);
-
-  const color = gl.getAttribLocation(program, "Color");
   gl.vertexAttribPointer(
-    color,
+    attribs.Position,
+    positionSize,
+    gl.FLOAT,
+    false,
+    stride,
+    0,
+  );
+  gl.enableVertexAttribArray(attribs.Position);
+
+  gl.vertexAttribPointer(
+    attribs.Color,
     colorSize,
     gl.UNSIGNED_BYTE,
     false,
     stride,
     positionBytes,
   );
-  gl.enableVertexAttribArray(color);
+  gl.enableVertexAttribArray(attribs.Color);
 
   gl.enable(gl.BLEND);
   gl.blendEquation(gl.FUNC_ADD);
   gl.blendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA);
+}
+
+function getAttribLocations<T extends string>(
+  gl: WebGL2RenderingContext,
+  program: WebGLProgram,
+  ...names: T[]
+): Record<T, GLint> {
+  return Object.fromEntries(
+    names.map((name) => [name, gl.getAttribLocation(program, name)]),
+  ) as Record<T, GLint>;
+}
+
+function getUniformLocations<T extends string>(
+  gl: WebGL2RenderingContext,
+  program: WebGLProgram,
+  ...names: T[]
+): Record<T, WebGLUniformLocation> {
+  return Object.fromEntries(
+    names.map((name) => [name, getUniformLocation(gl, program, name)]),
+  ) as Record<T, WebGLUniformLocation>;
+}
+
+function getUniformLocation(
+  gl: WebGL2RenderingContext,
+  program: WebGLProgram,
+  name: string,
+): WebGLUniformLocation {
+  const location = gl.getUniformLocation(program, name);
+  if (!location) {
+    throw new Error(
+      `Failed to get uniform location: ${name} (${gl.getError()})`,
+    );
+  }
+  return location;
 }
 
 function loadShaderProgram({

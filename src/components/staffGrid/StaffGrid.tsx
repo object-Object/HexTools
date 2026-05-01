@@ -16,19 +16,22 @@ export default function StaffGrid() {
     const gui = new GuiSpellcasting(canvasRef.current);
     guiRef.current = gui;
 
+    let isMounted = true;
     const handleAnimationFrame = (timestamp: DOMHighResTimeStamp) => {
-      if (canvasRef.current) {
+      if (isMounted) {
         gui.render({
           mouseX: mouseXRef.current,
           mouseY: mouseYRef.current,
           timestamp,
         });
+        requestAnimationFrame(handleAnimationFrame);
       }
-      id = requestAnimationFrame(handleAnimationFrame);
     };
-    let id = requestAnimationFrame(handleAnimationFrame);
+    requestAnimationFrame(handleAnimationFrame);
 
-    return () => cancelAnimationFrame(id);
+    return () => {
+      isMounted = false;
+    };
   }, []);
 
   const handlePointerDown: PointerEventHandler = () => {

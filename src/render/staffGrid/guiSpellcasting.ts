@@ -3,7 +3,11 @@ import _ from "lodash";
 
 import { lerp, mod } from "../../utils/math";
 import { BufferBuilder } from "../buffer";
-import { enablePositionColorShader, loadPositionColorShader } from "../shaders";
+import {
+  enablePositionColorShader,
+  loadPositionColorShader,
+  type PositionColorShader,
+} from "../shaders";
 import { HexAngle, HexCoord, HexDir, HexPattern } from "./hexMath";
 import { coordToPx, pxToCoord } from "./hexUtils";
 import {
@@ -17,7 +21,7 @@ import {
 export class GuiSpellcasting {
   canvas: HTMLCanvasElement;
   gl: WebGL2RenderingContext;
-  program: WebGLProgram;
+  shader: PositionColorShader;
   buf: BufferBuilder;
 
   private drawState: PatternDrawState = BETWEEN_PATTERNS;
@@ -39,7 +43,7 @@ export class GuiSpellcasting {
 
     this.canvas = canvas;
     this.gl = gl;
-    this.program = loadPositionColorShader(gl);
+    this.shader = loadPositionColorShader(gl);
     this.buf = new BufferBuilder(gl);
   }
 
@@ -140,7 +144,7 @@ export class GuiSpellcasting {
 
     enablePositionColorShader({
       gl,
-      program: this.program,
+      shader: this.shader,
       width: this.width,
       height: this.height,
     });
