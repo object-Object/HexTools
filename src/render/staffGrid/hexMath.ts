@@ -50,6 +50,10 @@ export namespace HexDir {
   export function rotatedBy(dir: HexDir, angle: HexAngle): HexDir {
     return mod(dir + angle, 6);
   }
+
+  export function angleFrom(dir: HexDir, other: HexDir): HexAngle {
+    return mod(dir - other, 6);
+  }
 }
 
 const dirToDelta: Record<HexDir, HexCoord> = {
@@ -77,14 +81,44 @@ export class HexPattern {
   ) {}
 
   tryAppendDir(newDir: HexDir): boolean {
-    return false;
+    const linesSeen = new Set<string>();
+
+    let cursor = { q: 0, r: 0 };
+    let compass = this.startDir;
+    for (const a of this.angles) {
+      linesSeen.add(`${HexCoord.toString(cursor)},${compass}`);
+      cursor = HexCoord.shiftedBy(cursor, compass);
+      const back = HexDir.rotatedBy(compass, HexAngle.BACK);
+      linesSeen.add(`${HexCoord.toString(cursor)},${back}`);
+      compass = HexDir.rotatedBy(compass, a);
+    }
+    cursor = HexCoord.shiftedBy(cursor, compass);
+
+    if (linesSeen.has(`${HexCoord.toString(cursor)},${newDir}`)) {
+      return false;
+    }
+    const nextAngle = HexDir.angleFrom(newDir, compass);
+    if (nextAngle === HexAngle.BACK) {
+      return false;
+    }
+
+    this.angles.push(nextAngle);
+    return true;
   }
 
   finalDir(): HexDir {
-    return this.startDir;
+    return this.angles.reduce(HexDir.rotatedBy, this.startDir);
   }
 
   *positions(): Generator<HexCoord> {
-    yield { q: 0, r: 0 };
+    let cursor = { q: 0, r: 0 };
+    let compass = this.startDir;
+    yield cursor;
+    for (const a of this.angles) {
+      cursor = HexCoord.shiftedBy(cursor, compass);
+      yield cursor;
+      compass = HexDir.rotatedBy(compass, a);
+    }
+    yield HexCoord.shiftedBy(cursor, compass);
   }
 }
