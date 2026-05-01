@@ -78,7 +78,7 @@ export function enablePositionColorShader({
     attribs.Color,
     colorSize,
     gl.UNSIGNED_BYTE,
-    false,
+    true,
     stride,
     positionBytes,
   );
