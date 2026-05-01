@@ -7,6 +7,7 @@ import {
   type Vec4Like,
 } from "gl-matrix";
 import _ from "lodash";
+import { createNoise3D } from "simplex-noise";
 
 import { lerp } from "../../utils/math";
 import type { BufferBuilder } from "../buffer";
@@ -193,6 +194,7 @@ export function drawPatternFromPoints({
   readabilityOffset,
   lastSegmentLenProportion,
   seed,
+  timestamp,
   isCtrlDown,
 }: {
   buf: BufferBuilder;
@@ -206,15 +208,36 @@ export function drawPatternFromPoints({
   readabilityOffset: number;
   lastSegmentLenProportion: number;
   seed: number;
+  timestamp: DOMHighResTimeStamp;
   isCtrlDown: boolean;
 }) {
-  // TODO
+  const zappyPts = makeZappy({
+    barePoints: points,
+    dupIndices,
+    hops: 10,
+    variance: 2.5,
+    speed: 0.1,
+    flowIrregular,
+    readabilityOffset,
+    lastSegmentLenProportion,
+    seed,
+    timestamp,
+  });
   const nodes = drawLast ? points : points.slice(0, -1);
-  drawLineSeq({ buf, mat, points, width: 5, z: 0, tail, head, isCtrlDown });
   drawLineSeq({
     buf,
     mat,
-    points,
+    points: zappyPts,
+    width: 5,
+    z: 0,
+    tail,
+    head,
+    isCtrlDown,
+  });
+  drawLineSeq({
+    buf,
+    mat,
+    points: zappyPts,
     width: 2,
     z: 1,
     tail: screenCol(tail),
@@ -232,6 +255,116 @@ export function drawPatternFromPoints({
       b: dodge(head[2]),
       a: head[3],
     });
+  }
+}
+
+function makeZappy({
+  barePoints,
+  dupIndices,
+  hops,
+  variance,
+  speed,
+  flowIrregular,
+  readabilityOffset,
+  lastSegmentLenProportion,
+  seed,
+  timestamp,
+}: {
+  barePoints: Vec2Like[];
+  dupIndices: Set<number>;
+  hops: number;
+  variance: number;
+  speed: number;
+  flowIrregular: number;
+  readabilityOffset: number;
+  lastSegmentLenProportion: number;
+  seed: number;
+  timestamp: DOMHighResTimeStamp;
+}): Vec2Like[] {
+  if (barePoints.length === 0) {
+    return [];
+  }
+  function zappify(points: Vec2Like[], truncateLast: boolean): Vec2Like[] {
+    const scaleVariance = (it: number) =>
+      Math.min(1, 8 * (0.5 - Math.abs(0.5 - it)));
+    // timestamp is in milliseconds, we want it in ticks, 50 mspt
+    const zSeed = (timestamp / 50) * speed;
+    // Create our output list of zap points
+    const zappyPts = [];
+    zappyPts.push(points[0]);
+    // For each segment in the original...
+    for (const [src, target, i] of zipWithNextWithIndex(points)) {
+      const delta = Vec2.clone(target).sub(src);
+      // Take hop distance
+      const hopDist = Vec2.distance(src, target) / hops;
+      // Compute how big the radius of variance should be
+      const maxVariance = hopDist * variance;
+
+      // for a list of length n, there will be n-1 pairs,
+      // and so the last index will be (n-1)-1
+      const maxJ =
+        truncateLast && i == points.length - 2
+          ? lastSegmentLenProportion * hops
+          : hops;
+
+      for (let j = 1; j <= maxJ; j++) {
+        const progress = j / (hops + 1);
+        // Add the next hop...
+        const pos = Vec2.clone(src).add(Vec2.clone(delta).scale(progress));
+        // as well as some random variance...
+        // (We use i, j (segment #, subsegment #) as seeds for the Perlin noise,
+        // and zSeed (i.e. time elapsed) to perturb the shape gradually over time)
+        const minorPerturb = getNoise(i, j, Math.sin(zSeed)) * flowIrregular;
+        const theta =
+          3
+          * getNoise(i + progress + minorPerturb - zSeed, 1337, seed)
+          * Math.PI
+          * 2;
+        const r =
+          getNoise(i + progress - zSeed, 69420, seed)
+          * maxVariance
+          * scaleVariance(progress);
+        const randomHop = new Vec2(r * Math.cos(theta), r * Math.sin(theta));
+        // Then record the new location.
+        zappyPts.push(Vec2.clone(pos).add(randomHop));
+
+        if (j == hops) {
+          // Finally, we hit the destination, add that too
+          // but we might not hit the destination if we want to stop short
+          zappyPts.push(target);
+        }
+      }
+    }
+    return zappyPts;
+  }
+
+  const points: Vec2Like[] = [];
+  const daisyChain: Vec2Like[] = [];
+  if (dupIndices != null) {
+    for (const [head, tail, i] of zipWithNextWithIndex(barePoints)) {
+      const tangent = Vec2.clone(tail).sub(head).scale(readabilityOffset);
+      if (i != 0 && dupIndices.has(i)) {
+        daisyChain.push(Vec2.clone(head).add(tangent));
+      } else {
+        daisyChain.push(head);
+      }
+      if (i == barePoints.length - 2) {
+        daisyChain.push(tail);
+        points.push(...zappify(daisyChain, true));
+      } else if (dupIndices.has(i + 1)) {
+        daisyChain.push(Vec2.clone(tail).sub(tangent));
+        points.push(...zappify(daisyChain, false));
+        daisyChain.splice(0);
+      }
+    }
+    return points;
+  }
+  return zappify(barePoints, true);
+}
+
+function* zipWithNextWithIndex<T>(values: T[]): Generator<[T, T, number]> {
+  for (let i = 0; i < values.length - 1; i++) {
+    yield [values[i], values[i + 1], i];
   }
 }
 
@@ -299,6 +432,12 @@ function screen(n: number) {
 function dodge(n: number) {
   return n * 0.9;
 }
+
+function getNoise(x: number, y: number, z: number) {
+  return NOISE(x * 0.6, y * 0.6, z * 0.6) / 2;
+}
+
+const NOISE = createNoise3D();
 
 export const DEFAULT_READABILITY_OFFSET = 0.2;
 const CAP_THETA = 180 / 10;

@@ -127,6 +127,7 @@ export class GuiSpellcasting {
     mouseX,
     mouseY,
     isCtrlDown,
+    timestamp,
   }: MousePos & {
     isCtrlDown: boolean;
     timestamp: DOMHighResTimeStamp;
@@ -194,6 +195,7 @@ export class GuiSpellcasting {
         readabilityOffset: DEFAULT_READABILITY_OFFSET,
         lastSegmentLenProportion: 1,
         seed: 0, // should be this.patterns.length
+        timestamp,
         isCtrlDown,
       });
     }
