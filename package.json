@@ -11,7 +11,8 @@
     "lint:eslint": "eslint .",
     "lint:prettier": "prettier . --check",
     "preview": "vite preview",
-    "storybook": "storybook dev -p 6006"
+    "storybook": "storybook dev -p 6006",
+    "storybook-webgl": "cross-env ENABLE_WEBGL_INSPECTOR=1 yarn storybook"
   },
   "resolutions": {
     "vite": "^8.0.0-beta.13"
@@ -41,6 +42,7 @@
     "@types/react-dom": "^19.2.3",
     "@vitejs/plugin-react": "^5.1.1",
     "babel-plugin-react-compiler": "^1.0.0",
+    "cross-env": "^10.1.0",
     "eslint": "^9.39.1",
     "eslint-plugin-react-dom": "^2.2.3",
     "eslint-plugin-react-hooks": "^7.0.1",
