@@ -126,7 +126,9 @@ export class GuiSpellcasting {
   render({
     mouseX,
     mouseY,
+    isCtrlDown,
   }: MousePos & {
+    isCtrlDown: boolean;
     timestamp: DOMHighResTimeStamp;
   }) {
     const { gl, buf } = this;
@@ -192,7 +194,7 @@ export class GuiSpellcasting {
         readabilityOffset: DEFAULT_READABILITY_OFFSET,
         lastSegmentLenProportion: 1,
         seed: 0, // should be this.patterns.length
-        isCtrlDown: false,
+        isCtrlDown,
       });
     }
   }

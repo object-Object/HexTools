@@ -7,6 +7,7 @@ export default function StaffGrid() {
   const guiRef = useRef<GuiSpellcasting>(null);
   const mouseXRef = useRef(0);
   const mouseYRef = useRef(0);
+  const isCtrlDownRef = useRef(false);
 
   useEffect(() => {
     if (!canvasRef.current) {
@@ -29,6 +30,7 @@ export default function StaffGrid() {
       gui.render({
         mouseX: mouseXRef.current,
         mouseY: mouseYRef.current,
+        isCtrlDown: isCtrlDownRef.current,
         timestamp,
       });
       requestAnimationFrame(handleAnimationFrame);
@@ -63,6 +65,23 @@ export default function StaffGrid() {
   const handlePointerUp: PointerEventHandler = () => {
     guiRef.current?.mouseReleased();
   };
+
+  const handleKeyDown = (event: KeyboardEvent) => {
+    isCtrlDownRef.current = event.ctrlKey;
+  };
+
+  const handleKeyUp = (event: KeyboardEvent) => {
+    isCtrlDownRef.current = event.ctrlKey;
+  };
+
+  useEffect(() => {
+    document.addEventListener("keydown", handleKeyDown);
+    document.addEventListener("keyup", handleKeyUp);
+    return () => {
+      document.removeEventListener("keydown", handleKeyDown);
+      document.removeEventListener("keyup", handleKeyUp);
+    };
+  }, []);
 
   return (
     <div
