@@ -1,4 +1,7 @@
+import type { Vec2, Vec2Like } from "gl-matrix";
+
 import { mod } from "../../utils/math";
+import { coordToPx } from "./hexUtils";
 
 export interface HexCoord {
   q: number;
@@ -110,8 +113,8 @@ export class HexPattern {
     return this.angles.reduce(HexDir.rotatedBy, this.startDir);
   }
 
-  *positions(): Generator<HexCoord> {
-    let cursor = { q: 0, r: 0 };
+  *positions(start: HexCoord = { q: 0, r: 0 }): Generator<HexCoord> {
+    let cursor = start;
     let compass = this.startDir;
     yield cursor;
     for (const a of this.angles) {
@@ -120,5 +123,11 @@ export class HexPattern {
       compass = HexDir.rotatedBy(compass, a);
     }
     yield HexCoord.shiftedBy(cursor, compass);
+  }
+
+  *toLines(size: number, offset: Vec2Like): Generator<Vec2> {
+    for (const coord of this.positions()) {
+      yield coordToPx({ coord, size, offset });
+    }
   }
 }

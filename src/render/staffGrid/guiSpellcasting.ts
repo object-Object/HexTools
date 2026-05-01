@@ -140,8 +140,22 @@ export class GuiSpellcasting {
   }
 
   mouseReleased() {
-    // TODO
-    this.drawState = BETWEEN_PATTERNS;
+    switch (this.drawState.type) {
+      case "betweenPatterns":
+        break;
+      case "justStarted":
+        this.drawState = BETWEEN_PATTERNS;
+        break;
+      case "drawing": {
+        const { start, wipPattern } = this.drawState;
+        this.drawState = BETWEEN_PATTERNS;
+        this.patterns.push({ pattern: wipPattern, origin: start });
+        for (const pos of wipPattern.positions(start)) {
+          this.usedSpots.add(HexCoord.toString(pos));
+        }
+        break;
+      }
+    }
   }
 
   render({
@@ -170,22 +184,42 @@ export class GuiSpellcasting {
     const mouseCoord = this.pxToCoord(mouseVec);
     const radius = 3;
     for (const dotCoord of HexCoord.rangeAround(mouseCoord, radius)) {
-      const dotPx = this.coordToPx(dotCoord);
-      const delta = Vec2.clone(dotPx).sub(mouseVec).mag;
-      const scaledDist = _.clamp(
-        1 - (delta - this.hexSize) / (radius * this.hexSize),
-        0,
-        1,
-      );
-      drawSpot({
+      if (!this.usedSpots.has(HexCoord.toString(dotCoord))) {
+        const dotPx = this.coordToPx(dotCoord);
+        const delta = Vec2.clone(dotPx).sub(mouseVec).mag;
+        const scaledDist = _.clamp(
+          1 - (delta - this.hexSize) / (radius * this.hexSize),
+          0,
+          1,
+        );
+        drawSpot({
+          buf,
+          mat,
+          point: dotPx,
+          radius: scaledDist * 2,
+          r: lerp(scaledDist, 0.4, 0.5),
+          g: lerp(scaledDist, 0.8, 1),
+          b: lerp(scaledDist, 0.7, 0.9),
+          a: scaledDist,
+        });
+      }
+    }
+
+    for (const [i, { pattern, origin }] of this.patterns.entries()) {
+      drawPatternFromPoints({
         buf,
         mat,
-        point: dotPx,
-        radius: scaledDist * 2,
-        r: lerp(scaledDist, 0.4, 0.5),
-        g: lerp(scaledDist, 0.8, 1),
-        b: lerp(scaledDist, 0.7, 0.9),
-        a: scaledDist,
+        points: [...pattern.toLines(this.hexSize, this.coordToPx(origin))],
+        dupIndices: findDupIndices(pattern.positions()),
+        drawLast: true,
+        tail: [115 / 255, 133 / 255, 222 / 255, 1],
+        head: [254 / 255, 203 / 255, 230 / 255, 1],
+        flowIrregular: 0.2,
+        readabilityOffset: DEFAULT_READABILITY_OFFSET,
+        lastSegmentLenProportion: 1,
+        seed: i,
+        timestamp,
+        isCtrlDown,
       });
     }
 
