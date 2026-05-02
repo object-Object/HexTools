@@ -61,7 +61,7 @@ export default function StaffGrid() {
         mouseY: mouseYRef.current,
       });
     } else {
-      // guiRef.current?.mouseCanceled();
+      guiRef.current?.mouseCanceled();
     }
   };
 
