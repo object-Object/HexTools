@@ -1,4 +1,4 @@
-import { Mat4, Vec2 } from "gl-matrix";
+import { Mat4, Vec2, type Vec2Like } from "gl-matrix";
 import _ from "lodash";
 
 import { lerp, mod } from "../../utils/math";
@@ -22,14 +22,9 @@ export interface GuiSpellcastingSettings {
   gridZoom: number;
   zappyVariance: number;
   ctrlTogglesOffStrokeOrder: boolean;
+  dotsMode: "none" | "mouse" | "all";
+  mouseDotsRadius: number;
 }
-
-export const DEFAULT_SETTINGS: GuiSpellcastingSettings = {
-  guiScale: 2,
-  gridZoom: 1,
-  zappyVariance: 2.5,
-  ctrlTogglesOffStrokeOrder: false,
-};
 
 // https://github.com/FallingColors/HexMod/blob/724c36bba6a97f97d16f95d16f7addb700e62443/Common/src/main/java/at/petrak/hexcasting/client/gui/GuiSpellcasting.kt
 export class GuiSpellcasting {
@@ -200,7 +195,7 @@ export class GuiSpellcasting {
     }
   }
 
-  escapePressed() {
+  mouseCanceled() {
     this.drawState = BETWEEN_PATTERNS;
   }
 
@@ -213,7 +208,7 @@ export class GuiSpellcasting {
     timestamp: DOMHighResTimeStamp;
   }) {
     const { mouseX, mouseY } = this.scaleMousePos(mousePos);
-    const { gl, buf } = this;
+    const { gl, buf, settings } = this;
 
     gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
 
@@ -228,26 +223,65 @@ export class GuiSpellcasting {
 
     const mouseVec = new Vec2(mouseX, mouseY);
     const mouseCoord = this.pxToCoord(mouseVec);
-    const radius = 3;
-    for (const dotCoord of HexCoord.rangeAround(mouseCoord, radius)) {
-      if (!this.usedSpots.has(HexCoord.toString(dotCoord))) {
-        const dotPx = this.coordToPx(dotCoord);
-        const delta = Vec2.clone(dotPx).sub(mouseVec).mag;
-        const scaledDist = _.clamp(
-          1 - (delta - this.hexSize) / (radius * this.hexSize),
-          0,
-          1,
-        );
-        drawSpot({
-          buf,
-          mat,
-          point: dotPx,
-          radius: scaledDist * 2,
-          r: lerp(scaledDist, 0.4, 0.5),
-          g: lerp(scaledDist, 0.8, 1),
-          b: lerp(scaledDist, 0.7, 0.9),
-          a: scaledDist,
-        });
+    switch (settings.dotsMode) {
+      case "none":
+        break;
+
+      case "mouse": {
+        for (const dotCoord of HexCoord.rangeAround(
+          mouseCoord,
+          settings.mouseDotsRadius,
+        )) {
+          if (!this.usedSpots.has(HexCoord.toString(dotCoord))) {
+            const dotPx = this.coordToPx(dotCoord);
+            const delta = Vec2.clone(dotPx).sub(mouseVec).mag;
+            const scaledDist = _.clamp(
+              1
+                - (delta - this.hexSize)
+                  / (settings.mouseDotsRadius * this.hexSize),
+              0,
+              1,
+            );
+            drawSpot({
+              buf,
+              mat,
+              point: dotPx,
+              radius: scaledDist * 2,
+              r: lerp(scaledDist, 0.4, 0.5),
+              g: lerp(scaledDist, 0.8, 1),
+              b: lerp(scaledDist, 0.7, 0.9),
+              a: scaledDist,
+            });
+          }
+        }
+        break;
+      }
+
+      case "all": {
+        const topLeft = this.pxToCoord([0, 0]);
+        const topLeftOffset = HexCoord.axialToOffset(topLeft);
+        const coord = { ...topLeftOffset };
+        let dotPx = this.coordToPx(topLeft);
+        while (dotPx.y < this.height) {
+          while (dotPx.x < this.width) {
+            drawSpot({
+              buf,
+              mat,
+              point: dotPx,
+              radius: 2,
+              r: 0.5,
+              g: 1,
+              b: 0.9,
+              a: 1,
+            });
+            coord.q++;
+            dotPx = this.coordToPx(HexCoord.offsetToAxial(coord));
+          }
+          coord.r++;
+          coord.q = topLeftOffset.q;
+          dotPx = this.coordToPx(HexCoord.offsetToAxial(coord));
+        }
+        break;
       }
     }
 
@@ -255,12 +289,12 @@ export class GuiSpellcasting {
       buf,
       mat,
       hops: 10,
-      variance: this.settings.zappyVariance,
+      variance: settings.zappyVariance,
       speed: 0.1,
       readabilityOffset: 0.2,
       lastSegmentLenProportion: 1,
       timestamp,
-      isCtrlDown: isCtrlDown !== this.settings.ctrlTogglesOffStrokeOrder,
+      isCtrlDown: isCtrlDown !== settings.ctrlTogglesOffStrokeOrder,
     } satisfies Partial<DrawPatternFromPointsOptions>;
 
     for (const [i, { pattern, origin }] of this.patterns.entries()) {
@@ -317,8 +351,23 @@ export class GuiSpellcasting {
     return coordToPx({ coord, size: this.hexSize, offset: this.coordsOffset });
   }
 
-  pxToCoord(px: Vec2) {
+  pxToCoord(px: Vec2Like) {
     return pxToCoord({ px, size: this.hexSize, offset: this.coordsOffset });
+  }
+
+  static getDefaultSettings({
+    isTouchscreen,
+  }: {
+    isTouchscreen: boolean;
+  }): GuiSpellcastingSettings {
+    return {
+      guiScale: 2,
+      gridZoom: isTouchscreen ? 0.75 : 1,
+      zappyVariance: 2.5,
+      ctrlTogglesOffStrokeOrder: false,
+      dotsMode: isTouchscreen ? "all" : "mouse",
+      mouseDotsRadius: 3,
+    };
   }
 }
 

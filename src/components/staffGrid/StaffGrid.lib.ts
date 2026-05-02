@@ -2,5 +2,5 @@ import type { ActionIconProps } from "@mantine/core";
 
 export const staffGridButtonProps = {
   variant: "default",
-  size: "lg",
+  size: "xl",
 } satisfies ActionIconProps;

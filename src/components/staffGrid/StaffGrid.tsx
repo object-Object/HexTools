@@ -1,11 +1,16 @@
 import { ActionIcon, Box, Stack } from "@mantine/core";
-import { IconTrash } from "@tabler/icons-react";
-import { useEffect, useRef, useState, type PointerEventHandler } from "react";
+import { useStateHistory } from "@mantine/hooks";
+import {
+  IconArrowBackUp,
+  IconArrowForwardUp,
+  IconTrash,
+} from "@tabler/icons-react";
+import React, { useEffect, useRef } from "react";
 
+import { useIsTouchscreen } from "../../hooks/useIsTouchscreen";
 import { useLocalStorageObject } from "../../hooks/useLocalStorageObject";
 import { useOnMount } from "../../hooks/useOnMount";
 import {
-  DEFAULT_SETTINGS,
   GuiSpellcasting,
   type GuiSpellcastingSettings,
   type ResolvedPattern,
@@ -14,12 +19,18 @@ import { staffGridButtonProps } from "./StaffGrid.lib";
 import StaffGridSettings from "./StaffGridSettings";
 
 export default function StaffGrid() {
-  const [patterns, setPatternsInternal] = useState<ResolvedPattern[]>([]);
+  const isTouchscreen = useIsTouchscreen();
 
-  const [settings, setSettingsInternal] =
+  const [patterns, patternsHandlers, patternsHistory] = useStateHistory<
+    ResolvedPattern[]
+  >([]);
+
+  const [settings, setSettings] =
     useLocalStorageObject<GuiSpellcastingSettings>({
       key: "staff-grid-settings",
-      defaultValue: DEFAULT_SETTINGS,
+      defaultValue: GuiSpellcasting.getDefaultSettings({
+        isTouchscreen,
+      }),
     });
 
   const canvasRef = useRef<HTMLCanvasElement>(null);
@@ -28,31 +39,27 @@ export default function StaffGrid() {
   const mouseYRef = useRef(0);
   const isCtrlDownRef = useRef(false);
 
-  const setPatterns = (newPatterns: ResolvedPattern[]) => {
-    setPatternsInternal(newPatterns);
-    guiRef.current?.setPatterns(newPatterns, false);
-  };
-
-  const setSettings = (newSettings: GuiSpellcastingSettings) => {
-    setSettingsInternal(newSettings);
-    if (guiRef.current) {
-      guiRef.current.settings = newSettings;
-    }
-  };
-
-  const handlePointerDown: PointerEventHandler = () => {
-    guiRef.current?.mouseClicked({
-      mouseX: mouseXRef.current,
-      mouseY: mouseYRef.current,
-    });
-  };
-
-  const handlePointerMove: PointerEventHandler = (event) => {
-    if (!canvasRef.current) return;
+  const updateMouseRefs = (event: React.PointerEvent) => {
+    if (!canvasRef.current || !event.isPrimary) return false;
     const rect = canvasRef.current.getBoundingClientRect();
     mouseXRef.current = event.clientX - rect.left;
     mouseYRef.current = event.clientY - rect.top;
-    if (event.buttons !== 0) {
+    return true;
+  };
+
+  const handlePointerDown = (event: React.PointerEvent) => {
+    if (updateMouseRefs(event)) {
+      guiRef.current?.mouseClicked({
+        mouseX: mouseXRef.current,
+        mouseY: mouseYRef.current,
+      });
+    } else {
+      // guiRef.current?.mouseCanceled();
+    }
+  };
+
+  const handlePointerMove = (event: React.PointerEvent) => {
+    if (updateMouseRefs(event) && event.buttons !== 0) {
       guiRef.current?.mouseDragged({
         mouseX: mouseXRef.current,
         mouseY: mouseYRef.current,
@@ -60,14 +67,22 @@ export default function StaffGrid() {
     }
   };
 
-  const handlePointerUp: PointerEventHandler = () => {
-    guiRef.current?.mouseReleased();
+  const handlePointerUp = (event: React.PointerEvent) => {
+    if (updateMouseRefs(event)) {
+      guiRef.current?.mouseReleased();
+    }
+  };
+
+  const handlePointerCancel = (event: React.PointerEvent) => {
+    if (updateMouseRefs(event)) {
+      guiRef.current?.mouseCanceled();
+    }
   };
 
   const handleKeyDown = (event: KeyboardEvent) => {
     isCtrlDownRef.current = event.ctrlKey;
     if (event.key === "Escape") {
-      guiRef.current?.escapePressed();
+      guiRef.current?.mouseCanceled();
     }
   };
 
@@ -90,8 +105,7 @@ export default function StaffGrid() {
       gl,
       settings,
       patterns,
-      // We don't need to notify the gui when the gui changes the patterns
-      onPatternsChange: setPatternsInternal,
+      onPatternsChange: patternsHandlers.set,
     });
     guiRef.current = gui;
 
@@ -123,6 +137,18 @@ export default function StaffGrid() {
     };
   }, []);
 
+  // settings isn't loaded from the session store when useOnMount runs
+  // so we need to update it in a useEffect instead of just the setter
+  useEffect(() => {
+    if (guiRef.current) {
+      guiRef.current.settings = settings;
+    }
+  }, [settings]);
+
+  useEffect(() => {
+    guiRef.current?.setPatterns(patterns, false);
+  }, [patterns]);
+
   return (
     <>
       <Box pos="absolute" inset="0" style={{ overflow: "hidden" }}>
@@ -131,14 +157,37 @@ export default function StaffGrid() {
           onPointerDown={handlePointerDown}
           onPointerMove={handlePointerMove}
           onPointerUp={handlePointerUp}
-          style={{ width: "100%", height: "100%", touchAction: "none" }}
+          onPointerCancel={handlePointerCancel}
+          style={{ width: "100%", height: "100%", touchAction: "pinch-zoom" }}
         />
       </Box>
 
       <Stack gap="xs" pos="absolute" top={16} right={16}>
         <StaffGridSettings settings={settings} onSettingsChange={setSettings} />
 
-        <ActionIcon {...staffGridButtonProps} onClick={() => setPatterns([])}>
+        <ActionIcon
+          {...staffGridButtonProps}
+          onClick={() => patternsHandlers.back()}
+          disabled={patternsHistory.current === 0}
+        >
+          <IconArrowBackUp />
+        </ActionIcon>
+
+        <ActionIcon
+          {...staffGridButtonProps}
+          onClick={() => patternsHandlers.forward()}
+          disabled={
+            patternsHistory.current === patternsHistory.history.length - 1
+          }
+        >
+          <IconArrowForwardUp />
+        </ActionIcon>
+
+        <ActionIcon
+          {...staffGridButtonProps}
+          onClick={() => patternsHandlers.set([])}
+          disabled={patterns.length === 0}
+        >
           <IconTrash />
         </ActionIcon>
       </Stack>

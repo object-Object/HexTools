@@ -1,9 +1,18 @@
-import { ActionIcon, Button, Modal, Stack, Switch } from "@mantine/core";
+import {
+  ActionIcon,
+  Button,
+  InputWrapper,
+  Modal,
+  SegmentedControl,
+  Stack,
+  Switch,
+} from "@mantine/core";
 import { useDisclosure } from "@mantine/hooks";
 import { IconSettings } from "@tabler/icons-react";
 
 import type { GuiSpellcastingSettings } from "../../render/staffGrid/guiSpellcasting";
 import { mod } from "../../utils/math";
+import type { KeysOfValue } from "../../utils/types";
 import ControlledNumberInput from "../ControlledNumberInput";
 import { staffGridButtonProps } from "./StaffGrid.lib";
 
@@ -16,8 +25,14 @@ export default function StaffGridSettings({
   settings,
   onSettingsChange,
 }: StaffGridSettingsProps) {
-  const { guiScale, gridZoom, zappyVariance, ctrlTogglesOffStrokeOrder } =
-    settings;
+  const {
+    guiScale,
+    gridZoom,
+    zappyVariance,
+    ctrlTogglesOffStrokeOrder,
+    dotsMode,
+    mouseDotsRadius,
+  } = settings;
   const [opened, { open, close }] = useDisclosure(false);
 
   function getSetter<T extends keyof GuiSpellcastingSettings>(
@@ -28,12 +43,20 @@ export default function StaffGridSettings({
     };
   }
 
+  function getSwitchSetter<
+    T extends KeysOfValue<GuiSpellcastingSettings, boolean>,
+  >(key: T): (event: React.ChangeEvent<HTMLInputElement>) => unknown {
+    const setter = getSetter(key);
+    return (event) => {
+      setter(event.currentTarget.checked);
+    };
+  }
+
   const setGuiScale = getSetter("guiScale");
-  const setCtrlTogglesOffStrokeOrder = getSetter("ctrlTogglesOffStrokeOrder");
 
   return (
     <>
-      <Modal opened={opened} onClose={close} title="Settings" centered>
+      <Modal opened={opened} onClose={close} title="Settings">
         <Stack>
           <Button
             variant="default"
@@ -48,8 +71,9 @@ export default function StaffGridSettings({
             label="Grid Zoom"
             value={gridZoom}
             onChange={getSetter("gridZoom")}
-            min={0.1}
-            step={0.1}
+            allowNegative={false}
+            min={0.25}
+            step={0.25}
           />
 
           <ControlledNumberInput
@@ -63,10 +87,32 @@ export default function StaffGridSettings({
           <Switch
             label="Ctrl Toggles Off Stroke Order"
             checked={ctrlTogglesOffStrokeOrder}
-            onChange={(event) =>
-              setCtrlTogglesOffStrokeOrder(event.currentTarget.checked)
-            }
+            onChange={getSwitchSetter("ctrlTogglesOffStrokeOrder")}
           />
+
+          <InputWrapper label="Grid Dots Mode" labelElement="div">
+            <SegmentedControl
+              value={dotsMode}
+              onChange={getSetter("dotsMode")}
+              data={[
+                { label: "None", value: "none" },
+                { label: "Around Mouse", value: "mouse" },
+                { label: "Full Grid", value: "all" },
+              ]}
+              fullWidth
+            />
+          </InputWrapper>
+
+          {dotsMode === "mouse" && (
+            <ControlledNumberInput
+              label="Mouse Dots Radius"
+              value={mouseDotsRadius}
+              onChange={getSetter("mouseDotsRadius")}
+              allowNegative={false}
+              allowDecimal={false}
+              min={1}
+            />
+          )}
         </Stack>
       </Modal>
 

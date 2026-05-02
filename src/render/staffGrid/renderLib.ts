@@ -385,6 +385,17 @@ export function findDupIndices(pts: Iterable<HexCoord>): Set<number> {
   return found;
 }
 
+export interface DrawSpotOptions {
+  buf: BufferBuilder;
+  mat: Mat4Like;
+  point: Vec2Like;
+  radius: number;
+  r: number;
+  g: number;
+  b: number;
+  a: number;
+}
+
 export function drawSpot({
   buf,
   mat,
@@ -394,16 +405,7 @@ export function drawSpot({
   g,
   b,
   a,
-}: {
-  buf: BufferBuilder;
-  mat: Mat4Like;
-  point: Vec2Like;
-  radius: number;
-  r: number;
-  g: number;
-  b: number;
-  a: number;
-}) {
+}: DrawSpotOptions) {
   buf.begin(buf.gl.TRIANGLE_FAN);
 
   buf.vertex(mat, point[0], point[1], 1).color(r, g, b, a);

@@ -16,9 +16,11 @@ export const HexCoord = {
     }
     return { q: coord.q + otherCoord.q, r: coord.r + otherCoord.r };
   },
+
   toString(coord: HexCoord) {
     return `${coord.q},${coord.r}`;
   },
+
   *rangeAround(center: HexCoord, radius: number): Generator<HexCoord> {
     let q = -radius;
     let r = Math.max(-radius, 0);
@@ -32,6 +34,23 @@ export const HexCoord = {
       r++;
       yield out;
     }
+  },
+
+  // https://www.redblobgames.com/grids/hexagons/#conversions-offset (odd-r)
+  axialToOffset(coord: HexCoord): HexCoord {
+    const parity = coord.r & 1;
+    return {
+      q: coord.q + (coord.r - parity) / 2,
+      r: coord.r,
+    };
+  },
+
+  offsetToAxial(coord: HexCoord): HexCoord {
+    const parity = coord.r & 1;
+    return {
+      q: coord.q - (coord.r - parity) / 2,
+      r: coord.r,
+    };
   },
 };
 
