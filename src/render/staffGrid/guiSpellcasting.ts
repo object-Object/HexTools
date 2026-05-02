@@ -24,6 +24,13 @@ export interface GuiSpellcastingSettings {
   ctrlTogglesOffStrokeOrder: boolean;
 }
 
+export const DEFAULT_SETTINGS: GuiSpellcastingSettings = {
+  guiScale: 2,
+  gridZoom: 1,
+  zappyVariance: 2.5,
+  ctrlTogglesOffStrokeOrder: false,
+};
+
 // https://github.com/FallingColors/HexMod/blob/724c36bba6a97f97d16f95d16f7addb700e62443/Common/src/main/java/at/petrak/hexcasting/client/gui/GuiSpellcasting.kt
 export class GuiSpellcasting {
   private shader: PositionColorShader;

@@ -4,28 +4,24 @@ import { useEffect, useRef, type PointerEventHandler } from "react";
 import { useLocalStorageObject } from "../../hooks/useLocalStorageObject";
 import { useOnMount } from "../../hooks/useOnMount";
 import {
+  DEFAULT_SETTINGS,
   GuiSpellcasting,
   type GuiSpellcastingSettings,
 } from "../../render/staffGrid/guiSpellcasting";
 import StaffGridSettings from "./StaffGridSettings";
 
 export default function StaffGrid() {
-  const [settings, setSettingsInternal] =
-    useLocalStorageObject<GuiSpellcastingSettings>({
-      key: "staff-grid-settings",
-      defaultValue: {
-        guiScale: 2,
-        gridZoom: 1,
-        zappyVariance: 2.5,
-        ctrlTogglesOffStrokeOrder: false,
-      },
-    });
-
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const guiRef = useRef<GuiSpellcasting>(null);
   const mouseXRef = useRef(0);
   const mouseYRef = useRef(0);
   const isCtrlDownRef = useRef(false);
+
+  const [settings, setSettingsInternal] =
+    useLocalStorageObject<GuiSpellcastingSettings>({
+      key: "staff-grid-settings",
+      defaultValue: DEFAULT_SETTINGS,
+    });
 
   const setSettings = (newSettings: GuiSpellcastingSettings) => {
     setSettingsInternal(newSettings);
