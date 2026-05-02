@@ -3,23 +3,23 @@ import { Link, useRoute } from "wouter";
 
 export interface HeaderNavLinkProps {
   label: string;
-  href: string;
+  path: string;
   onClick: () => unknown;
 }
 
 export default function HeaderNavLink({
   label,
-  href,
+  path,
   onClick,
 }: HeaderNavLinkProps) {
-  const [isActive] = useRoute(href);
+  const [isActive] = useRoute(path);
 
   return (
     <Button
-      key={href}
+      key={path}
       variant={isActive ? "filled" : "default"}
       component={Link}
-      href={href}
+      href={path}
       onClick={onClick}
     >
       {label}

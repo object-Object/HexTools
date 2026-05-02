@@ -17,18 +17,16 @@ import StaffGrid from "./components/staffGrid/StaffGrid";
 import SwindlerStacks from "./components/swindler/SwindlerStacks";
 
 export default function App() {
-  const isMobile = useMatches({ base: true, sm: false });
+  const mobileBreakpoint = "xs";
+  const isMobile = useMatches({ base: true, [mobileBreakpoint]: false });
   const [sidebarOpen, { toggle: toggleSidebar, close: closeSidebar }] =
     useDisclosure();
 
-  const navButtons = [
-    ["Swindler", "/Swindler"],
-    ["Staff Grid", "/StaffGrid"],
-  ].map(([label, href]) => (
+  const navButtons = routes.map(({ path, label }) => (
     <HeaderNavLink
-      key={href}
+      key={path}
+      path={path}
       label={label}
-      href={href}
       onClick={closeSidebar}
     />
   ));
@@ -39,7 +37,7 @@ export default function App() {
       header={{ height: 56 }}
       navbar={{
         width: "100%",
-        breakpoint: "sm",
+        breakpoint: mobileBreakpoint,
         collapsed: { desktop: true, mobile: !sidebarOpen },
       }}
     >
@@ -75,17 +73,20 @@ export default function App() {
 
       <AppShell.Main>
         <Switch>
-          <Route path="/Swindler" component={SwindlerStacks} />
-
-          <Route path="/StaffGrid">
-            <StaffGrid guiScale={2} />
-          </Route>
+          {routes.map(({ path, component }) => (
+            <Route key={path} path={path} component={component} />
+          ))}
 
           <Route>
-            <Redirect to="/Swindler" />
+            <Redirect to={routes[0].path} />
           </Route>
         </Switch>
       </AppShell.Main>
     </AppShell>
   );
 }
+
+const routes = [
+  { path: "/Swindler", label: "Swindler", component: SwindlerStacks },
+  { path: "/StaffGrid", label: "Staff Grid", component: StaffGrid },
+];

@@ -3,16 +3,13 @@ import { useEffect, useRef, type PointerEventHandler } from "react";
 import { useOnMount } from "../../hooks/useOnMount";
 import { GuiSpellcasting } from "../../render/staffGrid/guiSpellcasting";
 
-export interface StaffGridProps {
-  guiScale: number;
-}
-
-export default function StaffGrid({ guiScale }: StaffGridProps) {
+export default function StaffGrid() {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const guiRef = useRef<GuiSpellcasting>(null);
   const mouseXRef = useRef(0);
   const mouseYRef = useRef(0);
   const isCtrlDownRef = useRef(false);
+  const guiScale = 2; // TODO
 
   useOnMount(() => {
     if (!canvasRef.current) {
