@@ -59,11 +59,18 @@ export default function StaffGrid() {
   };
 
   const handlePointerMove = (event: React.PointerEvent) => {
-    if (updateMouseRefs(event) && event.buttons !== 0) {
-      guiRef.current?.mouseDragged({
-        mouseX: mouseXRef.current,
-        mouseY: mouseYRef.current,
-      });
+    if (updateMouseRefs(event)) {
+      if (event.buttons !== 0) {
+        guiRef.current?.mouseDragged({
+          mouseX: mouseXRef.current,
+          mouseY: mouseYRef.current,
+        });
+      } else {
+        guiRef.current?.mouseMoved({
+          mouseX: mouseXRef.current,
+          mouseY: mouseYRef.current,
+        });
+      }
     }
   };
 

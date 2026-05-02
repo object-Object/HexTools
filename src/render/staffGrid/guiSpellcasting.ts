@@ -24,6 +24,7 @@ export interface GuiSpellcastingSettings {
   ctrlTogglesOffStrokeOrder: boolean;
   dotsMode: "none" | "mouse" | "all";
   mouseDotsRadius: number;
+  clickingTogglesDrawing: boolean;
 }
 
 // https://github.com/FallingColors/HexMod/blob/724c36bba6a97f97d16f95d16f7addb700e62443/Common/src/main/java/at/petrak/hexcasting/client/gui/GuiSpellcasting.kt
@@ -105,8 +106,20 @@ export class GuiSpellcasting {
     }
   }
 
-  mouseClicked(mousePos: MousePos) {
-    const { mouseX, mouseY } = this.scaleMousePos(mousePos);
+  mouseClicked(rawMousePos: MousePos) {
+    const mousePos = this.scaleMousePos(rawMousePos);
+    if (this.settings.clickingTogglesDrawing) {
+      if (this.drawState.type === "betweenPatterns") {
+        this.drawStart(mousePos);
+      } else {
+        this.drawEnd();
+      }
+    } else {
+      this.drawStart(mousePos);
+    }
+  }
+
+  private drawStart({ mouseX, mouseY }: MousePos) {
     const mx = _.clamp(mouseX, 0, this.width);
     const my = _.clamp(mouseY, 0, this.height);
     if (this.drawState.type === "betweenPatterns") {
@@ -117,8 +130,24 @@ export class GuiSpellcasting {
     }
   }
 
-  mouseDragged(mousePos: MousePos) {
-    const { mouseX, mouseY } = this.scaleMousePos(mousePos);
+  mouseMoved(rawMousePos: MousePos) {
+    const mousePos = this.scaleMousePos(rawMousePos);
+    if (
+      this.settings.clickingTogglesDrawing
+      && this.drawState.type !== "betweenPatterns"
+    ) {
+      this.drawMove(mousePos);
+    }
+  }
+
+  mouseDragged(rawMousePos: MousePos) {
+    const mousePos = this.scaleMousePos(rawMousePos);
+    if (!this.settings.clickingTogglesDrawing) {
+      this.drawMove(mousePos);
+    }
+  }
+
+  private drawMove({ mouseX, mouseY }: MousePos) {
     const mx = _.clamp(mouseX, 0, this.width);
     const my = _.clamp(mouseY, 0, this.height);
 
@@ -180,6 +209,12 @@ export class GuiSpellcasting {
   }
 
   mouseReleased() {
+    if (!this.settings.clickingTogglesDrawing) {
+      this.drawEnd();
+    }
+  }
+
+  private drawEnd() {
     switch (this.drawState.type) {
       case "betweenPatterns":
         break;
@@ -367,6 +402,7 @@ export class GuiSpellcasting {
       ctrlTogglesOffStrokeOrder: false,
       dotsMode: isTouchscreen ? "all" : "mouse",
       mouseDotsRadius: 3,
+      clickingTogglesDrawing: false,
     };
   }
 }

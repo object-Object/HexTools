@@ -32,7 +32,9 @@ export default function StaffGridSettings({
     ctrlTogglesOffStrokeOrder,
     dotsMode,
     mouseDotsRadius,
+    clickingTogglesDrawing,
   } = settings;
+
   const [opened, { open, close }] = useDisclosure(false);
 
   function getSetter<T extends keyof GuiSpellcastingSettings>(
@@ -88,6 +90,12 @@ export default function StaffGridSettings({
             label="Ctrl Toggles Off Stroke Order"
             checked={ctrlTogglesOffStrokeOrder}
             onChange={getSwitchSetter("ctrlTogglesOffStrokeOrder")}
+          />
+
+          <Switch
+            label="Clicking Toggles Drawing"
+            checked={clickingTogglesDrawing}
+            onChange={getSwitchSetter("clickingTogglesDrawing")}
           />
 
           <InputWrapper label="Grid Dots Mode" labelElement="div">
