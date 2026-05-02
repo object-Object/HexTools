@@ -1,7 +1,7 @@
 import { Box } from "@mantine/core";
-import { useLocalStorage } from "@mantine/hooks";
 import { useEffect, useRef, type PointerEventHandler } from "react";
 
+import { useLocalStorageObject } from "../../hooks/useLocalStorageObject";
 import { useOnMount } from "../../hooks/useOnMount";
 import {
   GuiSpellcasting,
@@ -11,7 +11,7 @@ import StaffGridSettings from "./StaffGridSettings";
 
 export default function StaffGrid() {
   const [settings, setSettingsInternal] =
-    useLocalStorage<GuiSpellcastingSettings>({
+    useLocalStorageObject<GuiSpellcastingSettings>({
       key: "staff-grid-settings",
       defaultValue: {
         guiScale: 2,
