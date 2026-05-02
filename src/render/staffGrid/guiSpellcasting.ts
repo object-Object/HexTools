@@ -17,13 +17,14 @@ import {
   type DrawPatternFromPointsOptions,
 } from "./renderLib";
 
-// https://github.com/FallingColors/HexMod/blob/724c36bba6a97f97d16f95d16f7addb700e62443/Common/src/main/java/at/petrak/hexcasting/client/gui/GuiSpellcasting.kt
-export class GuiSpellcasting {
-  gl: WebGL2RenderingContext;
+export interface GuiSpellcastingSettings {
   guiScale: number;
   gridZoom: number;
   zappyVariance: number;
+}
 
+// https://github.com/FallingColors/HexMod/blob/724c36bba6a97f97d16f95d16f7addb700e62443/Common/src/main/java/at/petrak/hexcasting/client/gui/GuiSpellcasting.kt
+export class GuiSpellcasting {
   private shader: PositionColorShader;
   private buf: BufferBuilder;
 
@@ -31,22 +32,10 @@ export class GuiSpellcasting {
   private usedSpots = new Set<string>();
   private patterns: ResolvedPattern[] = [];
 
-  constructor({
-    gl,
-    guiScale,
-    gridZoom,
-    zappyVariance,
-  }: {
-    gl: WebGL2RenderingContext;
-    guiScale: number;
-    gridZoom: number;
-    zappyVariance: number;
-  }) {
-    this.gl = gl;
-    this.guiScale = guiScale;
-    this.gridZoom = gridZoom;
-    this.zappyVariance = zappyVariance;
-
+  constructor(
+    public gl: WebGL2RenderingContext,
+    public settings: GuiSpellcastingSettings,
+  ) {
     gl.clearColor(0, 0, 0, 0);
     gl.clearDepth(1);
     gl.enable(gl.DEPTH_TEST);
@@ -60,18 +49,22 @@ export class GuiSpellcasting {
   }
 
   get width() {
-    return this.gl.canvas.width / this.guiScale;
+    return this.scaleValue(this.gl.canvas.width);
   }
 
   get height() {
-    return this.gl.canvas.height / this.guiScale;
+    return this.scaleValue(this.gl.canvas.height);
   }
 
   scaleMousePos({ mouseX, mouseY }: MousePos): MousePos {
     return {
-      mouseX: mouseX / this.guiScale,
-      mouseY: mouseY / this.guiScale,
+      mouseX: this.scaleValue(mouseX),
+      mouseY: this.scaleValue(mouseY),
     };
+  }
+
+  scaleValue(value: number) {
+    return value / this.settings.guiScale;
   }
 
   mouseClicked(mousePos: MousePos) {
@@ -222,7 +215,7 @@ export class GuiSpellcasting {
       buf,
       mat,
       hops: 10,
-      variance: this.zappyVariance,
+      variance: this.settings.zappyVariance,
       speed: 0.1,
       readabilityOffset: 0.2,
       lastSegmentLenProportion: 1,
@@ -273,7 +266,7 @@ export class GuiSpellcasting {
 
   get hexSize() {
     const baseScale = Math.sqrt((this.width * this.height) / 512);
-    return baseScale / this.gridZoom;
+    return baseScale / this.settings.gridZoom;
   }
 
   get coordsOffset() {

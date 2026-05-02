@@ -3,28 +3,35 @@ import { useLocalStorage } from "@mantine/hooks";
 import { useEffect, useRef, type PointerEventHandler } from "react";
 
 import { useOnMount } from "../../hooks/useOnMount";
-import { GuiSpellcasting } from "../../render/staffGrid/guiSpellcasting";
+import {
+  GuiSpellcasting,
+  type GuiSpellcastingSettings,
+} from "../../render/staffGrid/guiSpellcasting";
 import StaffGridSettings from "./StaffGridSettings";
 
 export default function StaffGrid() {
-  const [guiScale, setGuiScale] = useLocalStorage({
-    key: "staff-grid-gui-scale",
-    defaultValue: 2,
-  });
-  const [gridZoom, setGridZoom] = useLocalStorage({
-    key: "staff-grid-grid-zoom",
-    defaultValue: 1,
-  });
-  const [zappyVariance, setZappyVariance] = useLocalStorage({
-    key: "staff-grid-zappy-variance",
-    defaultValue: 2.5,
-  });
+  const [settings, setSettingsInternal] =
+    useLocalStorage<GuiSpellcastingSettings>({
+      key: "staff-grid-settings",
+      defaultValue: {
+        guiScale: 2,
+        gridZoom: 1,
+        zappyVariance: 2.5,
+      },
+    });
 
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const guiRef = useRef<GuiSpellcasting>(null);
   const mouseXRef = useRef(0);
   const mouseYRef = useRef(0);
   const isCtrlDownRef = useRef(false);
+
+  const setSettings = (newSettings: GuiSpellcastingSettings) => {
+    setSettingsInternal(newSettings);
+    if (guiRef.current) {
+      guiRef.current.settings = newSettings;
+    }
+  };
 
   const handlePointerDown: PointerEventHandler = () => {
     guiRef.current?.mouseClicked({
@@ -72,7 +79,7 @@ export default function StaffGrid() {
       throw new Error("WebGL2 not supported :(");
     }
 
-    const gui = new GuiSpellcasting({ gl, guiScale, gridZoom, zappyVariance });
+    const gui = new GuiSpellcasting(gl, settings);
     guiRef.current = gui;
 
     let isMounted = true;
@@ -103,14 +110,6 @@ export default function StaffGrid() {
     };
   }, []);
 
-  useEffect(() => {
-    if (guiRef.current) {
-      guiRef.current.guiScale = guiScale;
-      guiRef.current.gridZoom = gridZoom;
-      guiRef.current.zappyVariance = zappyVariance;
-    }
-  }, [guiScale, gridZoom, zappyVariance]);
-
   return (
     <>
       <Box pos="absolute" inset="0" style={{ overflow: "hidden" }}>
@@ -123,14 +122,7 @@ export default function StaffGrid() {
         />
       </Box>
       <Box pos="absolute" top={16} right={16}>
-        <StaffGridSettings
-          guiScale={guiScale}
-          setGuiScale={setGuiScale}
-          gridZoom={gridZoom}
-          setGridZoom={setGridZoom}
-          zappyVariance={zappyVariance}
-          setZappyVariance={setZappyVariance}
-        />
+        <StaffGridSettings settings={settings} onSettingsChange={setSettings} />
       </Box>
     </>
   );
