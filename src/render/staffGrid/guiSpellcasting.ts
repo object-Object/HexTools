@@ -33,6 +33,10 @@ export const DEFAULT_SETTINGS: GuiSpellcastingSettings = {
 
 // https://github.com/FallingColors/HexMod/blob/724c36bba6a97f97d16f95d16f7addb700e62443/Common/src/main/java/at/petrak/hexcasting/client/gui/GuiSpellcasting.kt
 export class GuiSpellcasting {
+  gl: WebGL2RenderingContext;
+  settings: GuiSpellcastingSettings;
+  onPatternsChange?: (resolvedPatterns: ResolvedPattern[]) => unknown;
+
   private shader: PositionColorShader;
   private buf: BufferBuilder;
 
@@ -40,10 +44,19 @@ export class GuiSpellcasting {
   private usedSpots = new Set<string>();
   private patterns: ResolvedPattern[] = [];
 
-  constructor(
-    public gl: WebGL2RenderingContext,
-    public settings: GuiSpellcastingSettings,
-  ) {
+  constructor({
+    gl,
+    settings,
+    onPatternsChange,
+    patterns,
+  }: Pick<GuiSpellcasting, "gl" | "settings" | "onPatternsChange"> & {
+    patterns: ResolvedPattern[];
+  }) {
+    this.gl = gl;
+    this.settings = settings;
+    this.onPatternsChange = onPatternsChange;
+    this.setPatterns(patterns, false);
+
     gl.clearColor(0, 0, 0, 0);
     gl.clearDepth(1);
     gl.enable(gl.DEPTH_TEST);
@@ -73,6 +86,28 @@ export class GuiSpellcasting {
 
   scaleValue(value: number) {
     return value / this.settings.guiScale;
+  }
+
+  addPattern(resolvedPattern: ResolvedPattern) {
+    const { pattern, origin } = resolvedPattern;
+    this.patterns = [...this.patterns, resolvedPattern];
+    for (const pos of pattern.positions(origin)) {
+      this.usedSpots.add(HexCoord.toString(pos));
+    }
+    this.onPatternsChange?.(this.patterns);
+  }
+
+  setPatterns(resolvedPatterns: ResolvedPattern[], notify: boolean) {
+    this.patterns = resolvedPatterns;
+    this.usedSpots.clear();
+    for (const { pattern, origin } of resolvedPatterns) {
+      for (const pos of pattern.positions(origin)) {
+        this.usedSpots.add(HexCoord.toString(pos));
+      }
+    }
+    if (notify) {
+      this.onPatternsChange?.(this.patterns);
+    }
   }
 
   mouseClicked(mousePos: MousePos) {
@@ -159,10 +194,7 @@ export class GuiSpellcasting {
       case "drawing": {
         const { start, wipPattern } = this.drawState;
         this.drawState = BETWEEN_PATTERNS;
-        this.patterns.push({ pattern: wipPattern, origin: start });
-        for (const pos of wipPattern.positions(start)) {
-          this.usedSpots.add(HexCoord.toString(pos));
-        }
+        this.addPattern({ pattern: wipPattern, origin: start });
         break;
       }
     }
@@ -290,6 +322,11 @@ export class GuiSpellcasting {
   }
 }
 
+export interface ResolvedPattern {
+  pattern: HexPattern;
+  origin: HexCoord;
+}
+
 interface MousePos {
   mouseX: number;
   mouseY: number;
@@ -311,11 +348,6 @@ interface Drawing {
   start: HexCoord;
   current: HexCoord;
   wipPattern: HexPattern;
-}
-
-interface ResolvedPattern {
-  pattern: HexPattern;
-  origin: HexCoord;
 }
 
 const BETWEEN_PATTERNS: BetweenPatterns = { type: "betweenPatterns" };

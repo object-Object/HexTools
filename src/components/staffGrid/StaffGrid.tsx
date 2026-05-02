@@ -1,5 +1,6 @@
-import { Box } from "@mantine/core";
-import { useEffect, useRef, type PointerEventHandler } from "react";
+import { ActionIcon, Box, Stack } from "@mantine/core";
+import { IconTrash } from "@tabler/icons-react";
+import { useEffect, useRef, useState, type PointerEventHandler } from "react";
 
 import { useLocalStorageObject } from "../../hooks/useLocalStorageObject";
 import { useOnMount } from "../../hooks/useOnMount";
@@ -7,21 +8,30 @@ import {
   DEFAULT_SETTINGS,
   GuiSpellcasting,
   type GuiSpellcastingSettings,
+  type ResolvedPattern,
 } from "../../render/staffGrid/guiSpellcasting";
+import { staffGridButtonProps } from "./StaffGrid.lib";
 import StaffGridSettings from "./StaffGridSettings";
 
 export default function StaffGrid() {
-  const canvasRef = useRef<HTMLCanvasElement>(null);
-  const guiRef = useRef<GuiSpellcasting>(null);
-  const mouseXRef = useRef(0);
-  const mouseYRef = useRef(0);
-  const isCtrlDownRef = useRef(false);
+  const [patterns, setPatternsInternal] = useState<ResolvedPattern[]>([]);
 
   const [settings, setSettingsInternal] =
     useLocalStorageObject<GuiSpellcastingSettings>({
       key: "staff-grid-settings",
       defaultValue: DEFAULT_SETTINGS,
     });
+
+  const canvasRef = useRef<HTMLCanvasElement>(null);
+  const guiRef = useRef<GuiSpellcasting>(null);
+  const mouseXRef = useRef(0);
+  const mouseYRef = useRef(0);
+  const isCtrlDownRef = useRef(false);
+
+  const setPatterns = (newPatterns: ResolvedPattern[]) => {
+    setPatternsInternal(newPatterns);
+    guiRef.current?.setPatterns(newPatterns, false);
+  };
 
   const setSettings = (newSettings: GuiSpellcastingSettings) => {
     setSettingsInternal(newSettings);
@@ -76,7 +86,13 @@ export default function StaffGrid() {
       throw new Error("WebGL2 not supported :(");
     }
 
-    const gui = new GuiSpellcasting(gl, settings);
+    const gui = new GuiSpellcasting({
+      gl,
+      settings,
+      patterns,
+      // We don't need to notify the gui when the gui changes the patterns
+      onPatternsChange: setPatternsInternal,
+    });
     guiRef.current = gui;
 
     let isMounted = true;
@@ -118,9 +134,14 @@ export default function StaffGrid() {
           style={{ width: "100%", height: "100%", touchAction: "none" }}
         />
       </Box>
-      <Box pos="absolute" top={16} right={16}>
+
+      <Stack gap="xs" pos="absolute" top={16} right={16}>
         <StaffGridSettings settings={settings} onSettingsChange={setSettings} />
-      </Box>
+
+        <ActionIcon {...staffGridButtonProps} onClick={() => setPatterns([])}>
+          <IconTrash />
+        </ActionIcon>
+      </Stack>
     </>
   );
 }

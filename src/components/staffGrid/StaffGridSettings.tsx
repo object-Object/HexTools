@@ -5,6 +5,7 @@ import { IconSettings } from "@tabler/icons-react";
 import type { GuiSpellcastingSettings } from "../../render/staffGrid/guiSpellcasting";
 import { mod } from "../../utils/math";
 import ControlledNumberInput from "../ControlledNumberInput";
+import { staffGridButtonProps } from "./StaffGrid.lib";
 
 export interface StaffGridSettingsProps {
   settings: GuiSpellcastingSettings;
@@ -69,7 +70,7 @@ export default function StaffGridSettings({
         </Stack>
       </Modal>
 
-      <ActionIcon variant="default" size="lg" onClick={open}>
+      <ActionIcon {...staffGridButtonProps} onClick={open}>
         <IconSettings />
       </ActionIcon>
     </>
