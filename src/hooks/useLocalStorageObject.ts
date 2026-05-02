@@ -12,6 +12,7 @@ export function useLocalStorageObject<T extends object>(
   const { defaultValue } = options;
   return useLocalStorage({
     ...options,
+    getInitialValueInEffect: false,
     deserialize: (localStorageValue = "{}") => {
       return {
         ...defaultValue,
