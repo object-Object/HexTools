@@ -11,18 +11,21 @@ import {
 import { HexAngle, HexCoord, HexDir, HexPattern } from "./hexMath";
 import { coordToPx, pxToCoord } from "./hexUtils";
 import {
-  DEFAULT_READABILITY_OFFSET,
   drawPatternFromPoints,
   drawSpot,
   findDupIndices,
+  type DrawPatternFromPointsOptions,
 } from "./renderLib";
 
 // https://github.com/FallingColors/HexMod/blob/724c36bba6a97f97d16f95d16f7addb700e62443/Common/src/main/java/at/petrak/hexcasting/client/gui/GuiSpellcasting.kt
 export class GuiSpellcasting {
   gl: WebGL2RenderingContext;
+  guiScale: number;
+  gridZoom: number;
+  zappyVariance: number;
+
   shader: PositionColorShader;
   buf: BufferBuilder;
-  guiScale: number;
 
   private drawState: PatternDrawState = BETWEEN_PATTERNS;
   private usedSpots = new Set<string>();
@@ -31,12 +34,18 @@ export class GuiSpellcasting {
   constructor({
     gl,
     guiScale,
+    gridZoom,
+    zappyVariance,
   }: {
     gl: WebGL2RenderingContext;
     guiScale: number;
+    gridZoom: number;
+    zappyVariance: number;
   }) {
     this.gl = gl;
     this.guiScale = guiScale;
+    this.gridZoom = gridZoom;
+    this.zappyVariance = zappyVariance;
 
     gl.clearColor(0, 0, 0, 0);
     gl.clearDepth(1);
@@ -205,21 +214,28 @@ export class GuiSpellcasting {
       }
     }
 
+    const commonPatternOptions = {
+      buf,
+      mat,
+      hops: 10,
+      variance: this.zappyVariance,
+      speed: 0.1,
+      readabilityOffset: 0.2,
+      lastSegmentLenProportion: 1,
+      timestamp,
+      isCtrlDown,
+    } satisfies Partial<DrawPatternFromPointsOptions>;
+
     for (const [i, { pattern, origin }] of this.patterns.entries()) {
       drawPatternFromPoints({
-        buf,
-        mat,
         points: [...pattern.toLines(this.hexSize, this.coordToPx(origin))],
         dupIndices: findDupIndices(pattern.positions()),
         drawLast: true,
         tail: [115 / 255, 133 / 255, 222 / 255, 1],
         head: [254 / 255, 203 / 255, 230 / 255, 1],
         flowIrregular: 0.2,
-        readabilityOffset: DEFAULT_READABILITY_OFFSET,
-        lastSegmentLenProportion: 1,
         seed: i,
-        timestamp,
-        isCtrlDown,
+        ...commonPatternOptions,
       });
     }
 
@@ -239,25 +255,21 @@ export class GuiSpellcasting {
 
       points.push(mouseVec);
       drawPatternFromPoints({
-        buf,
-        mat,
         points,
         dupIndices,
         drawLast: false,
         tail: [100 / 255, 200 / 255, 1, 1],
         head: [254 / 255, 203 / 255, 230 / 255, 1],
         flowIrregular: 0.1,
-        readabilityOffset: DEFAULT_READABILITY_OFFSET,
-        lastSegmentLenProportion: 1,
         seed: this.patterns.length,
-        timestamp,
-        isCtrlDown,
+        ...commonPatternOptions,
       });
     }
   }
 
   get hexSize() {
-    return Math.sqrt((this.width * this.height) / 512);
+    const baseScale = Math.sqrt((this.width * this.height) / 512);
+    return baseScale / this.gridZoom;
   }
 
   get coordsOffset() {

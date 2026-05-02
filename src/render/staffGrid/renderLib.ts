@@ -182,48 +182,27 @@ function rotate(vec: Vec2, theta: number): Vec2 {
   return new Vec2(vec.x * cos - vec.y * sin, vec.y * cos + vec.x * sin);
 }
 
-export function drawPatternFromPoints({
-  buf,
-  mat,
-  points,
-  dupIndices,
-  drawLast,
-  tail,
-  head,
-  flowIrregular,
-  readabilityOffset,
-  lastSegmentLenProportion,
-  seed,
-  timestamp,
-  isCtrlDown,
-}: {
+export interface DrawPatternFromPointsOptions extends MakeZappyOptions {
   buf: BufferBuilder;
   mat: Mat4Like;
-  points: Vec2Like[];
-  dupIndices: Set<number>;
   drawLast: boolean;
   tail: Vec4Like;
   head: Vec4Like;
-  flowIrregular: number;
-  readabilityOffset: number;
-  lastSegmentLenProportion: number;
-  seed: number;
-  timestamp: DOMHighResTimeStamp;
   isCtrlDown: boolean;
-}) {
-  const zappyPts = makeZappy({
-    barePoints: points,
-    dupIndices,
-    hops: 10,
-    variance: 2.5,
-    speed: 0.1,
-    flowIrregular,
-    readabilityOffset,
-    lastSegmentLenProportion,
-    seed,
-    timestamp,
-  });
-  const nodes = drawLast ? points : points.slice(0, -1);
+}
+
+export function drawPatternFromPoints({
+  buf,
+  mat,
+  drawLast,
+  tail,
+  head,
+  isCtrlDown,
+  ...zappyOptions
+}: DrawPatternFromPointsOptions) {
+  const { points } = zappyOptions;
+
+  const zappyPts = makeZappy(zappyOptions);
   drawLineSeq({
     buf,
     mat,
@@ -244,6 +223,8 @@ export function drawPatternFromPoints({
     head: screenCol(head),
     isCtrlDown,
   });
+
+  const nodes = drawLast ? points : points.slice(0, -1);
   for (const node of nodes) {
     drawSpot({
       buf,
@@ -258,19 +239,8 @@ export function drawPatternFromPoints({
   }
 }
 
-function makeZappy({
-  barePoints,
-  dupIndices,
-  hops,
-  variance,
-  speed,
-  flowIrregular,
-  readabilityOffset,
-  lastSegmentLenProportion,
-  seed,
-  timestamp,
-}: {
-  barePoints: Vec2Like[];
+interface MakeZappyOptions {
+  points: Vec2Like[];
   dupIndices: Set<number>;
   hops: number;
   variance: number;
@@ -280,13 +250,42 @@ function makeZappy({
   lastSegmentLenProportion: number;
   seed: number;
   timestamp: DOMHighResTimeStamp;
-}): Vec2Like[] {
+}
+
+function makeZappy({
+  points: barePoints,
+  dupIndices,
+  hops,
+  variance,
+  speed,
+  flowIrregular,
+  readabilityOffset,
+  lastSegmentLenProportion,
+  seed,
+  timestamp,
+}: MakeZappyOptions): Vec2Like[] {
   if (barePoints.length === 0) {
     return [];
   }
   function zappify(points: Vec2Like[], truncateLast: boolean): Vec2Like[] {
-    const scaleVariance = (it: number) =>
-      Math.min(1, 8 * (0.5 - Math.abs(0.5 - it)));
+    if (variance <= 0) {
+      // No variance means no zappy, so don't bother breaking segment into hops
+      if (!truncateLast || points.length < 2) {
+        return points;
+      }
+
+      const src = points[points.length - 2];
+      const target = points[points.length - 1];
+      const scaledDelta = Vec2.clone(target)
+        .sub(src)
+        .scale(lastSegmentLenProportion);
+      return [
+        ...points.slice(0, -1),
+        // No idea if this is correct; not planning on testing it
+        scaledDelta.add(src),
+      ];
+    }
+
     // timestamp is in milliseconds, we want it in ticks, 50 mspt
     const zSeed = (timestamp / 50) * speed;
     // Create our output list of zap points
@@ -323,7 +322,7 @@ function makeZappy({
         const r =
           getNoise(i + progress - zSeed, 69420, seed)
           * maxVariance
-          * scaleVariance(progress);
+          * Math.min(1, 8 * (0.5 - Math.abs(0.5 - progress)));
         const randomHop = new Vec2(r * Math.cos(theta), r * Math.sin(theta));
         // Then record the new location.
         zappyPts.push(Vec2.clone(pos).add(randomHop));
@@ -439,5 +438,4 @@ function getNoise(x: number, y: number, z: number) {
 
 const NOISE = createNoise3D();
 
-export const DEFAULT_READABILITY_OFFSET = 0.2;
 const CAP_THETA = 180 / 10;
