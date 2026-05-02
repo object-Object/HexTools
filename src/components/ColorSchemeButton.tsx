@@ -5,7 +5,12 @@ import {
 } from "@mantine/core";
 import { IconMoon, IconSun } from "@tabler/icons-react";
 
-export default function ColorSchemeButton(props: ActionIconProps) {
+export interface ColorSchemeButtonProps extends Omit<
+  ActionIconProps,
+  "onClick"
+> {}
+
+export default function ColorSchemeButton(props: ColorSchemeButtonProps) {
   const { colorScheme, toggleColorScheme } = useMantineColorScheme();
 
   return (
