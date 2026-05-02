@@ -1,5 +1,5 @@
 import { ActionIcon, Box, Stack } from "@mantine/core";
-import { useStateHistory } from "@mantine/hooks";
+import { useHotkeys, useStateHistory } from "@mantine/hooks";
 import {
   IconArrowBackUp,
   IconArrowForwardUp,
@@ -38,6 +38,12 @@ export default function StaffGrid() {
   const mouseXRef = useRef(0);
   const mouseYRef = useRef(0);
   const isCtrlDownRef = useRef(false);
+
+  useHotkeys([
+    ["Escape", () => guiRef.current?.mouseCanceled()],
+    ["mod+Z", () => patternsHandlers.back()],
+    ["mod+Y", () => patternsHandlers.forward()],
+  ]);
 
   const updateMouseRefs = (event: React.PointerEvent) => {
     if (!canvasRef.current || !event.isPrimary) return false;
@@ -88,9 +94,6 @@ export default function StaffGrid() {
 
   const handleKeyDown = (event: KeyboardEvent) => {
     isCtrlDownRef.current = event.ctrlKey;
-    if (event.key === "Escape") {
-      guiRef.current?.mouseCanceled();
-    }
   };
 
   const handleKeyUp = (event: KeyboardEvent) => {
