@@ -43,6 +43,7 @@ export default function StaffGrid() {
     ["Escape", () => guiRef.current?.mouseCanceled()],
     ["mod+Z", () => patternsHandlers.back()],
     ["mod+Y", () => patternsHandlers.forward()],
+    ["mod+shift+Z", () => patternsHandlers.forward()],
   ]);
 
   const updateMouseRefs = (event: React.PointerEvent) => {
