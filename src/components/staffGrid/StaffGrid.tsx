@@ -1,7 +1,9 @@
+import { Box } from "@mantine/core";
 import { useEffect, useRef, useState, type PointerEventHandler } from "react";
 
 import { useOnMount } from "../../hooks/useOnMount";
 import { GuiSpellcasting } from "../../render/staffGrid/guiSpellcasting";
+import StaffGridSettings from "./StaffGridSettings";
 
 export default function StaffGrid() {
   const [guiScale, setGuiScaleInternal] = useState(2);
@@ -94,24 +96,20 @@ export default function StaffGrid() {
   }, []);
 
   return (
-    <div
-      style={{
-        position: "absolute",
-        overflow: "hidden",
-        top: 0,
-        left: 0,
-        bottom: 0,
-        right: 0,
-      }}
-    >
-      <canvas
-        ref={canvasRef}
-        onPointerDown={handlePointerDown}
-        onPointerMove={handlePointerMove}
-        onPointerUp={handlePointerUp}
-        style={{ width: "100%", height: "100%", touchAction: "none" }}
-      />
-    </div>
+    <>
+      <Box pos="absolute" inset="0" style={{ overflow: "hidden" }}>
+        <canvas
+          ref={canvasRef}
+          onPointerDown={handlePointerDown}
+          onPointerMove={handlePointerMove}
+          onPointerUp={handlePointerUp}
+          style={{ width: "100%", height: "100%", touchAction: "none" }}
+        />
+      </Box>
+      <Box pos="absolute" top={16} right={16}>
+        <StaffGridSettings guiScale={guiScale} setGuiScale={setGuiScale} />
+      </Box>
+    </>
   );
 }
 
