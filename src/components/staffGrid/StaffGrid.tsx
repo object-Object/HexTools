@@ -17,6 +17,7 @@ export default function StaffGrid() {
         guiScale: 2,
         gridZoom: 1,
         zappyVariance: 2.5,
+        ctrlTogglesOffStrokeOrder: false,
       },
     });
 

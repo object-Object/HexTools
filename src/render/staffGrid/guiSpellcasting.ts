@@ -21,6 +21,7 @@ export interface GuiSpellcastingSettings {
   guiScale: number;
   gridZoom: number;
   zappyVariance: number;
+  ctrlTogglesOffStrokeOrder: boolean;
 }
 
 // https://github.com/FallingColors/HexMod/blob/724c36bba6a97f97d16f95d16f7addb700e62443/Common/src/main/java/at/petrak/hexcasting/client/gui/GuiSpellcasting.kt
@@ -220,7 +221,7 @@ export class GuiSpellcasting {
       readabilityOffset: 0.2,
       lastSegmentLenProportion: 1,
       timestamp,
-      isCtrlDown,
+      isCtrlDown: isCtrlDown !== this.settings.ctrlTogglesOffStrokeOrder,
     } satisfies Partial<DrawPatternFromPointsOptions>;
 
     for (const [i, { pattern, origin }] of this.patterns.entries()) {

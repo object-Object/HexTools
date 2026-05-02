@@ -1,4 +1,4 @@
-import { ActionIcon, Button, Modal, Stack } from "@mantine/core";
+import { ActionIcon, Button, Modal, Stack, Switch } from "@mantine/core";
 import { useDisclosure } from "@mantine/hooks";
 import { IconSettings } from "@tabler/icons-react";
 
@@ -15,7 +15,8 @@ export default function StaffGridSettings({
   settings,
   onSettingsChange,
 }: StaffGridSettingsProps) {
-  const { guiScale, gridZoom, zappyVariance } = settings;
+  const { guiScale, gridZoom, zappyVariance, ctrlTogglesOffStrokeOrder } =
+    settings;
   const [opened, { open, close }] = useDisclosure(false);
 
   function getSetter<T extends keyof GuiSpellcastingSettings>(
@@ -27,6 +28,7 @@ export default function StaffGridSettings({
   }
 
   const setGuiScale = getSetter("guiScale");
+  const setCtrlTogglesOffStrokeOrder = getSetter("ctrlTogglesOffStrokeOrder");
 
   return (
     <>
@@ -55,6 +57,14 @@ export default function StaffGridSettings({
             onChange={getSetter("zappyVariance")}
             allowNegative={false}
             step={0.1}
+          />
+
+          <Switch
+            label="Ctrl Toggles Off Stroke Order"
+            checked={ctrlTogglesOffStrokeOrder}
+            onChange={(event) =>
+              setCtrlTogglesOffStrokeOrder(event.currentTarget.checked)
+            }
           />
         </Stack>
       </Modal>
