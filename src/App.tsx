@@ -33,6 +33,8 @@ export default function App() {
 
   return (
     <AppShell
+      h="100dvh"
+      mode="static"
       padding="md"
       header={{ height: 56 }}
       navbar={{
@@ -71,7 +73,7 @@ export default function App() {
         </Stack>
       </AppShell.Navbar>
 
-      <AppShell.Main>
+      <AppShell.Main pos="relative">
         <Switch>
           {routes.map(({ path, component }) => (
             <Route key={path} path={path} component={component} />
