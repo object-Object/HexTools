@@ -52,6 +52,9 @@ export default function StaffGrid() {
 
   const handleKeyDown = (event: KeyboardEvent) => {
     isCtrlDownRef.current = event.ctrlKey;
+    if (event.key === "Escape") {
+      guiRef.current?.escapePressed();
+    }
   };
 
   const handleKeyUp = (event: KeyboardEvent) => {

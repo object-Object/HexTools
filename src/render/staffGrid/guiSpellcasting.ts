@@ -24,8 +24,8 @@ export class GuiSpellcasting {
   gridZoom: number;
   zappyVariance: number;
 
-  shader: PositionColorShader;
-  buf: BufferBuilder;
+  private shader: PositionColorShader;
+  private buf: BufferBuilder;
 
   private drawState: PatternDrawState = BETWEEN_PATTERNS;
   private usedSpots = new Set<string>();
@@ -165,6 +165,10 @@ export class GuiSpellcasting {
         break;
       }
     }
+  }
+
+  escapePressed() {
+    this.drawState = BETWEEN_PATTERNS;
   }
 
   render({
