@@ -303,7 +303,7 @@ export class GuiSpellcasting {
               buf,
               mat,
               point: dotPx,
-              radius: 2,
+              radius: 1.25,
               r: 0.5,
               g: 1,
               b: 0.9,
