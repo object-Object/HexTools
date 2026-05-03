@@ -96,6 +96,15 @@ export enum HexAngle {
   LEFT,
 }
 
+const angleToLetter: Record<HexAngle, string> = {
+  [HexAngle.FORWARD]: "w",
+  [HexAngle.RIGHT]: "e",
+  [HexAngle.RIGHT_BACK]: "d",
+  [HexAngle.BACK]: "s",
+  [HexAngle.LEFT_BACK]: "a",
+  [HexAngle.LEFT]: "q",
+};
+
 export class HexPattern {
   constructor(
     public startDir: HexDir,
@@ -148,5 +157,9 @@ export class HexPattern {
     for (const coord of this.positions()) {
       yield coordToPx({ coord, size, offset });
     }
+  }
+
+  anglesSignature(): string {
+    return this.angles.map((angle) => angleToLetter[angle]).join("");
   }
 }
