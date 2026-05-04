@@ -34,13 +34,13 @@ export class BufferBuilder {
     if (mat != null) {
       const vec = new Vec4(x, y, z, 1);
       Vec4.transformMat4(vec, vec, mat);
-      this.buffer.writeFloat32(vec.x);
-      this.buffer.writeFloat32(vec.y);
-      this.buffer.writeFloat32(vec.z);
+      this.buffer.writeInt32(Math.floor(vec.x * FIXED_POINT));
+      this.buffer.writeInt32(Math.floor(vec.y * FIXED_POINT));
+      this.buffer.writeInt32(Math.floor(vec.z * FIXED_POINT));
     } else {
-      this.buffer.writeFloat32(x);
-      this.buffer.writeFloat32(y);
-      this.buffer.writeFloat32(z);
+      this.buffer.writeInt32(Math.floor(x * FIXED_POINT));
+      this.buffer.writeInt32(Math.floor(y * FIXED_POINT));
+      this.buffer.writeInt32(Math.floor(z * FIXED_POINT));
     }
     this.vertices++;
     return this;
@@ -54,3 +54,6 @@ export class BufferBuilder {
     return this;
   }
 }
+
+// Keep in sync with FIXED_POINT in position_color.vsh
+const FIXED_POINT = 1024;

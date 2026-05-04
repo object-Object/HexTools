@@ -67,7 +67,7 @@ export function enablePositionColorShader({
   gl.vertexAttribPointer(
     attribs.Position,
     positionSize,
-    gl.FLOAT,
+    gl.INT,
     false,
     stride,
     0,

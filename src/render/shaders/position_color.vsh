@@ -8,8 +8,11 @@ uniform mat4 ProjMat;
 
 out vec4 vertexColor;
 
+// Keep in sync with FIXED_POINT in buffer.ts
+const float FIXED_POINT = 1024.0;
+
 void main() {
-    gl_Position = ProjMat * ModelViewMat * vec4(Position, 1.0);
+    gl_Position = ProjMat * ModelViewMat * vec4(Position / FIXED_POINT, 1.0);
 
     vertexColor = Color;
 }
