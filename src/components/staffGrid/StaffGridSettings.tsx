@@ -119,7 +119,7 @@ export default function StaffGridSettings({
           />
 
           <Switch
-            label="Grid Wobbles On Shake"
+            label="Patterns Wobble On Shake"
             checked={zappyOnShake}
             disabled={!canRequestMotionPermission}
             error={requestMotionPermissionError}
