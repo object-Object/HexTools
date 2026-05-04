@@ -30,12 +30,18 @@ export class BufferBuilder {
     return this;
   }
 
-  vertex(mat: Mat4Like, x: number, y: number, z: number): this {
-    const vec = new Vec4(x, y, z, 1);
-    Vec4.transformMat4(vec, vec, mat);
-    this.buffer.writeFloat32(vec.x);
-    this.buffer.writeFloat32(vec.y);
-    this.buffer.writeFloat32(vec.z);
+  vertex(mat: Mat4Like | null, x: number, y: number, z: number): this {
+    if (mat != null) {
+      const vec = new Vec4(x, y, z, 1);
+      Vec4.transformMat4(vec, vec, mat);
+      this.buffer.writeFloat32(vec.x);
+      this.buffer.writeFloat32(vec.y);
+      this.buffer.writeFloat32(vec.z);
+    } else {
+      this.buffer.writeFloat32(x);
+      this.buffer.writeFloat32(y);
+      this.buffer.writeFloat32(z);
+    }
     this.vertices++;
     return this;
   }

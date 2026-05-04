@@ -1,4 +1,4 @@
-import { Mat4, Vec2, type Vec2Like } from "gl-matrix";
+import { Vec2, type Vec2Like } from "gl-matrix";
 import _ from "lodash";
 
 import { lerp, mod } from "../../utils/math";
@@ -258,8 +258,6 @@ export class GuiSpellcasting {
       height: this.height,
     });
 
-    const mat = new Mat4();
-
     const mouseVec = new Vec2(mouseX, mouseY);
     const mouseCoord = this.pxToCoord(mouseVec);
     switch (settings.dotsMode) {
@@ -283,7 +281,7 @@ export class GuiSpellcasting {
             );
             drawSpot({
               buf,
-              mat,
+              mat: null,
               point: dotPx,
               radius: scaledDist * 2,
               r: lerp(scaledDist, 0.4, 0.5),
@@ -305,7 +303,7 @@ export class GuiSpellcasting {
           while (dotPx.x < this.width) {
             drawSpot({
               buf,
-              mat,
+              mat: null,
               point: dotPx,
               radius: 1.25,
               r: 0.5,
@@ -326,7 +324,7 @@ export class GuiSpellcasting {
 
     const commonPatternOptions = {
       buf,
-      mat,
+      mat: null,
       hops: 10,
       variance: settings.zappyVariance * zappyMultiplier,
       speed: 0.1,

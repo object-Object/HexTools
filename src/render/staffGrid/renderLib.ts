@@ -26,7 +26,7 @@ export function drawLineSeq({
   isCtrlDown,
 }: {
   buf: BufferBuilder;
-  mat: Mat4Like;
+  mat: Mat4Like | null;
   points: Vec2Like[];
   width: number;
   z: number;
@@ -184,7 +184,7 @@ function rotate(vec: Vec2, theta: number): Vec2 {
 
 export interface DrawPatternFromPointsOptions extends MakeZappyOptions {
   buf: BufferBuilder;
-  mat: Mat4Like;
+  mat: Mat4Like | null;
   drawLast: boolean;
   tail: Vec4Like;
   head: Vec4Like;
@@ -387,7 +387,7 @@ export function findDupIndices(pts: Iterable<HexCoord>): Set<number> {
 
 export interface DrawSpotOptions {
   buf: BufferBuilder;
-  mat: Mat4Like;
+  mat: Mat4Like | null;
   point: Vec2Like;
   radius: number;
   r: number;
