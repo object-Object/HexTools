@@ -7,7 +7,7 @@ import {
   Stack,
   Switch,
 } from "@mantine/core";
-import { useDisclosure } from "@mantine/hooks";
+import { useDisclosure, useMediaQuery } from "@mantine/hooks";
 import { IconSettings } from "@tabler/icons-react";
 
 import { useRequestDeviceMotionPermission } from "../../hooks/useDeviceMotion";
@@ -39,6 +39,7 @@ export default function StaffGridSettings({
   } = settings;
 
   const [opened, { open, close }] = useDisclosure(false);
+  const isMobile = useMediaQuery("(max-width: 30em)");
 
   const {
     canRequestPermission: canRequestMotionPermission,
@@ -72,7 +73,12 @@ export default function StaffGridSettings({
 
   return (
     <>
-      <Modal opened={opened} onClose={close} title="Settings">
+      <Modal
+        opened={opened}
+        onClose={close}
+        fullScreen={isMobile}
+        title="Settings"
+      >
         <Stack>
           <Button
             variant="default"
