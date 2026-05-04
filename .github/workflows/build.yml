@@ -8,15 +8,14 @@ on:
   workflow_call:
   workflow_dispatch:
 
-env:
-  # https://github.com/actions/setup-node/issues/531#issuecomment-1819151412
-  SKIP_YARN_COREPACK_CHECK: true
-
 jobs:
   build:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v6
+
+      # https://github.com/actions/setup-node/issues/904#issuecomment-2670963061
+      - run: corepack enable
 
       - uses: actions/setup-node@v6
         with:
@@ -24,7 +23,7 @@ jobs:
           cache: yarn
 
       - name: Install dependencies
-        run: yarn install --frozen-lockfile
+        run: yarn install --immutable
       
       - name: Check Yarn constraints
         run: yarn constraints
@@ -42,13 +41,15 @@ jobs:
     steps:
       - uses: actions/checkout@v6
 
+      - run: corepack enable
+
       - uses: actions/setup-node@v6
         with:
           node-version: lts/*
           cache: yarn
 
       - name: Install dependencies
-        run: yarn install --frozen-lockfile
+        run: yarn install --immutable
 
       - name: Run ESLint
         run: yarn lint:eslint
@@ -58,13 +59,15 @@ jobs:
     steps:
       - uses: actions/checkout@v6
 
+      - run: corepack enable
+
       - uses: actions/setup-node@v6
         with:
           node-version: lts/*
           cache: yarn
 
       - name: Install dependencies
-        run: yarn install --frozen-lockfile
+        run: yarn install --immutable
 
       - name: Run Prettier
         run: yarn lint:prettier
