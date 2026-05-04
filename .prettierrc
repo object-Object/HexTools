@@ -1,9 +1,0 @@
-{
-  "experimentalOperatorPosition": "start",
-  "importOrder": ["^hextools-", "^[./]"],
-  "importOrderSeparation": true,
-  "plugins": [
-    "prettier-plugin-packagejson",
-    "@trivago/prettier-plugin-sort-imports"
-  ]
-}

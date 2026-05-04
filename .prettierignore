@@ -1,1 +1,5 @@
 **/*.webmanifest
+
+# Yarn
+.pnp.*
+.yarn/*

@@ -2574,6 +2574,11 @@ __metadata:
     typescript-eslint: "npm:^8.48.0"
     vite: "npm:^8.0.0-beta.13"
     wouter: "npm:^3.9.0"
+  dependenciesMeta:
+    "@trivago/prettier-plugin-sort-imports@5.2.2":
+      unplugged: true
+    prettier-plugin-packagejson@3.0.0:
+      unplugged: true
   languageName: unknown
   linkType: soft
 

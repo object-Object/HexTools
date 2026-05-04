@@ -10,7 +10,7 @@ import globals from "globals";
 import tseslint from "typescript-eslint";
 
 export default defineConfig([
-  globalIgnores(["dist", ".storybook"]),
+  globalIgnores(["dist", ".storybook", ".pnp.*", ".yarn"]),
   reactHooks.configs.flat["recommended-latest"],
   ...storybook.configs["flat/recommended"],
   {
