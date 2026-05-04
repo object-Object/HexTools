@@ -20,6 +20,7 @@ import {
 export interface GuiSpellcastingSettings {
   guiScale: number;
   gridZoom: number;
+  enableZappyPoints: boolean;
   zappyVariance: number;
   ctrlTogglesOffStrokeOrder: boolean;
   dotsMode: "none" | "mouse" | "all";
@@ -326,7 +327,9 @@ export class GuiSpellcasting {
       buf,
       mat: null,
       hops: 10,
-      variance: settings.zappyVariance * zappyMultiplier,
+      variance: settings.enableZappyPoints
+        ? settings.zappyVariance * zappyMultiplier
+        : 0,
       speed: 0.1,
       readabilityOffset: 0.2,
       lastSegmentLenProportion: 1,
@@ -400,6 +403,7 @@ export class GuiSpellcasting {
     return {
       guiScale: 2,
       gridZoom: isTouchscreen ? 0.75 : 1,
+      enableZappyPoints: true,
       zappyVariance: 2.5,
       ctrlTogglesOffStrokeOrder: false,
       dotsMode: isTouchscreen ? "all" : "mouse",

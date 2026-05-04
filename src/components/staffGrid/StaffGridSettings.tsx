@@ -31,6 +31,7 @@ export default function StaffGridSettings({
   const {
     guiScale,
     gridZoom,
+    enableZappyPoints,
     zappyVariance,
     ctrlTogglesOffStrokeOrder,
     dotsMode,
@@ -100,13 +101,36 @@ export default function StaffGridSettings({
             step={0.25}
           />
 
-          <ControlledNumberInput
-            label="Pattern Wobbliness"
-            value={zappyVariance}
-            onChange={getSetter("zappyVariance")}
-            allowNegative={false}
-            step={0.1}
+          <Switch
+            label="Enable Wobbly Patterns"
+            checked={enableZappyPoints}
+            onChange={getSwitchSetter("enableZappyPoints")}
           />
+
+          {enableZappyPoints && (
+            <>
+              <Switch
+                label="Patterns Wobble On Shake"
+                checked={zappyOnShake}
+                disabled={!canRequestMotionPermission}
+                error={requestMotionPermissionError}
+                // eslint-disable-next-line @typescript-eslint/no-misused-promises
+                onChange={async (value) => {
+                  setZappyOnShake(
+                    value.currentTarget.checked
+                      && (await requestMotionPermission()),
+                  );
+                }}
+              />
+              <ControlledNumberInput
+                label="Pattern Wobbliness"
+                value={zappyVariance}
+                onChange={getSetter("zappyVariance")}
+                allowNegative={false}
+                step={0.1}
+              />
+            </>
+          )}
 
           <Switch
             label="Ctrl Toggles Off Stroke Order"
@@ -118,20 +142,6 @@ export default function StaffGridSettings({
             label="Clicking Toggles Drawing"
             checked={clickingTogglesDrawing}
             onChange={getSwitchSetter("clickingTogglesDrawing")}
-          />
-
-          <Switch
-            label="Patterns Wobble On Shake"
-            checked={zappyOnShake}
-            disabled={!canRequestMotionPermission}
-            error={requestMotionPermissionError}
-            // eslint-disable-next-line @typescript-eslint/no-misused-promises
-            onChange={async (value) => {
-              setZappyOnShake(
-                value.currentTarget.checked
-                  && (await requestMotionPermission()),
-              );
-            }}
           />
 
           <InputWrapper
