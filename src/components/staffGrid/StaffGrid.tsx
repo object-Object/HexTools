@@ -47,7 +47,7 @@ export default function StaffGrid() {
   const mouseXRef = useRef(0);
   const mouseYRef = useRef(0);
   const isCtrlDownRef = useRef(false);
-  const zappyMultiplierRef = useRef(0);
+  const zappyMultiplierRef = useRef(1);
 
   useHotkeys([
     ["Escape", () => guiRef.current?.mouseCanceled()],
