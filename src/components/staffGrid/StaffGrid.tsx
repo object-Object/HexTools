@@ -34,12 +34,14 @@ export default function StaffGrid() {
     ResolvedPattern[]
   >([]);
 
+  const defaultSettings = GuiSpellcasting.getDefaultSettings({
+    isTouchscreen,
+  });
+
   const [settings, setSettings] =
     useLocalStorageObject<GuiSpellcastingSettings>({
       key: "staff-grid-settings",
-      defaultValue: GuiSpellcasting.getDefaultSettings({
-        isTouchscreen,
-      }),
+      defaultValue: defaultSettings,
     });
 
   const canvasRef = useRef<HTMLCanvasElement>(null);
@@ -259,7 +261,11 @@ export default function StaffGrid() {
       </Drawer>
 
       <Stack gap="xs" pos="absolute" top={16} right={16}>
-        <StaffGridSettings settings={settings} onSettingsChange={setSettings} />
+        <StaffGridSettings
+          settings={settings}
+          onSettingsChange={setSettings}
+          onResetSettings={() => setSettings(defaultSettings)}
+        />
 
         <ActionIcon {...staffGridButtonProps} onClick={toggleSidebar}>
           <IconMenu2 />

@@ -20,11 +20,13 @@ import { staffGridButtonProps } from "./StaffGrid.lib";
 export interface StaffGridSettingsProps {
   settings: GuiSpellcastingSettings;
   onSettingsChange: (value: GuiSpellcastingSettings) => unknown;
+  onResetSettings: () => unknown;
 }
 
 export default function StaffGridSettings({
   settings,
   onSettingsChange,
+  onResetSettings,
 }: StaffGridSettingsProps) {
   const {
     guiScale,
@@ -180,6 +182,10 @@ export default function StaffGridSettings({
               min={1}
             />
           )}
+
+          <Button variant="light" color="red" onClick={onResetSettings}>
+            Reset All Settings
+          </Button>
         </Stack>
       </Modal>
 
