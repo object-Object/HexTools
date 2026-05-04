@@ -25,7 +25,7 @@ export class BufferBuilder {
   end(): this {
     const gl = this.gl;
     this.buffer.flip();
-    gl.bufferData(gl.ARRAY_BUFFER, this.buffer.buffer, gl.STREAM_DRAW);
+    gl.bufferData(gl.ARRAY_BUFFER, this.buffer.toArrayBuffer(), gl.STREAM_DRAW);
     gl.drawArrays(this.mode, 0, this.vertices);
     return this;
   }
