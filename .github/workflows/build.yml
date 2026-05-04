@@ -8,6 +8,10 @@ on:
   workflow_call:
   workflow_dispatch:
 
+env:
+  # https://github.com/actions/setup-node/issues/531#issuecomment-1819151412
+  SKIP_YARN_COREPACK_CHECK: true
+
 jobs:
   build:
     runs-on: ubuntu-latest
