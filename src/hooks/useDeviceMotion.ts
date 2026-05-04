@@ -28,13 +28,15 @@ export function useDeviceMotion({
   shakeDuration,
   shakeThreshold,
   onMeanAcceleration,
-  onShake,
+  onShake: propsOnShake,
 }: UseDeviceMotionInput): UseDeviceMotionResult {
   const [acceleration, setAccelerationInternal] = useState(0);
   const [isShaking, setIsShaking] = useState(false);
   const accelerationHistory = useRef<{ acceleration: number; time: number }[]>(
     [],
   ).current;
+
+  const onShake = useThrottledCallback(() => propsOnShake?.(), shakeDuration);
 
   const setAcceleration = useThrottledCallback((acceleration: number) => {
     setAccelerationInternal(acceleration);
@@ -88,23 +90,29 @@ export function useDeviceMotion({
 }
 
 export interface UseRequestDeviceMotionPermissionResult {
+  hasPermission: boolean | null;
   canRequestPermission: boolean;
   requestPermission: () => Promise<boolean>;
 }
 
 export function useRequestDeviceMotionPermission(): UseRequestDeviceMotionPermissionResult {
+  const [hasPermission, setHasPermission] = useState<boolean | null>(null);
   const [canRequestPermission, setCanRequestPermission] = useState(true);
 
   return {
+    hasPermission,
     canRequestPermission,
     requestPermission: async () => {
+      if (hasPermission !== null) return hasPermission;
       try {
         const result = await DeviceMotionEvent.requestPermission?.();
         const hasPermission = result !== "denied";
+        setHasPermission(hasPermission);
         setCanRequestPermission(hasPermission);
         return hasPermission;
       } catch (err) {
         console.warn("Failed to request DeviceMotionEvent permission", err);
+        setHasPermission(false);
         setCanRequestPermission(false);
         return false;
       }

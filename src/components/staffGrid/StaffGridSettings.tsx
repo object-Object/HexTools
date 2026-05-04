@@ -34,8 +34,8 @@ export default function StaffGridSettings({
     dotsMode,
     mouseDotsRadius,
     clickingTogglesDrawing,
-    shakeToClear,
     zappyOnShake,
+    shakeAction,
   } = settings;
 
   const [opened, { open, close }] = useDisclosure(false);
@@ -44,6 +44,10 @@ export default function StaffGridSettings({
     canRequestPermission: canRequestMotionPermission,
     requestPermission: requestMotionPermission,
   } = useRequestDeviceMotionPermission();
+
+  const requestMotionPermissionError = !canRequestMotionPermission
+    ? "Device motion permission denied :("
+    : null;
 
   function getSetter<T extends keyof GuiSpellcastingSettings>(
     key: T,
@@ -63,8 +67,8 @@ export default function StaffGridSettings({
   }
 
   const setGuiScale = getSetter("guiScale");
-  const setShakeToClear = getSetter("shakeToClear");
   const setZappyOnShake = getSetter("zappyOnShake");
+  const setShakeAction = getSetter("shakeAction");
 
   return (
     <>
@@ -109,30 +113,10 @@ export default function StaffGridSettings({
           />
 
           <Switch
-            label="Shake To Clear Grid"
-            checked={canRequestMotionPermission && shakeToClear}
+            label="Grid Wobbles On Shake"
+            checked={zappyOnShake}
             disabled={!canRequestMotionPermission}
-            error={
-              !canRequestMotionPermission
-              && "Device motion permission denied :("
-            }
-            // eslint-disable-next-line @typescript-eslint/no-misused-promises
-            onChange={async (value) => {
-              setShakeToClear(
-                value.currentTarget.checked
-                  && (await requestMotionPermission()),
-              );
-            }}
-          />
-
-          <Switch
-            label="Wobble On Shake"
-            checked={canRequestMotionPermission && zappyOnShake}
-            disabled={!canRequestMotionPermission}
-            error={
-              !canRequestMotionPermission
-              && "Device motion permission denied :("
-            }
+            error={requestMotionPermissionError}
             // eslint-disable-next-line @typescript-eslint/no-misused-promises
             onChange={async (value) => {
               setZappyOnShake(
@@ -141,6 +125,31 @@ export default function StaffGridSettings({
               );
             }}
           />
+
+          <InputWrapper
+            label="Action On Shake"
+            error={requestMotionPermissionError}
+            labelElement="div"
+          >
+            <SegmentedControl
+              value={shakeAction}
+              disabled={!canRequestMotionPermission}
+              // eslint-disable-next-line @typescript-eslint/no-misused-promises
+              onChange={async (value) => {
+                setShakeAction(
+                  value !== "none" && (await requestMotionPermission())
+                    ? value
+                    : "none",
+                );
+              }}
+              data={[
+                { label: "None", value: "none" },
+                { label: "Undo", value: "undo" },
+                { label: "Clear Grid", value: "clear" },
+              ]}
+              fullWidth
+            />
+          </InputWrapper>
 
           <InputWrapper label="Grid Dots Mode" labelElement="div">
             <SegmentedControl

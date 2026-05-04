@@ -65,8 +65,15 @@ export default function StaffGrid() {
         : 1;
     },
     onShake: () => {
-      if (settings.shakeToClear) {
-        patternsHandlers.set([]);
+      switch (settings.shakeAction) {
+        case "none":
+          break;
+        case "undo":
+          patternsHandlers.back();
+          break;
+        case "clear":
+          patternsHandlers.set([]);
+          break;
       }
     },
   });

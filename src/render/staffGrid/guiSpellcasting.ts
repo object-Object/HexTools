@@ -25,8 +25,8 @@ export interface GuiSpellcastingSettings {
   dotsMode: "none" | "mouse" | "all";
   mouseDotsRadius: number;
   clickingTogglesDrawing: boolean;
-  shakeToClear: boolean;
   zappyOnShake: boolean;
+  shakeAction: "none" | "undo" | "clear";
 }
 
 // https://github.com/FallingColors/HexMod/blob/724c36bba6a97f97d16f95d16f7addb700e62443/Common/src/main/java/at/petrak/hexcasting/client/gui/GuiSpellcasting.kt
@@ -407,7 +407,7 @@ export class GuiSpellcasting {
       dotsMode: isTouchscreen ? "all" : "mouse",
       mouseDotsRadius: 3,
       clickingTogglesDrawing: false,
-      shakeToClear: false,
+      shakeAction: "none",
       zappyOnShake: false,
     };
   }
