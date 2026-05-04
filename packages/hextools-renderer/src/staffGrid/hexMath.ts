@@ -1,6 +1,6 @@
 import type { Vec2, Vec2Like } from "gl-matrix";
 
-import { mod } from "../../utils/math";
+import { mod } from "../math";
 import { coordToPx } from "./hexUtils";
 
 export interface HexCoord {

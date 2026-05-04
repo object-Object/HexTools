@@ -11,16 +11,17 @@ import {
 import _ from "lodash";
 import React, { useEffect, useRef } from "react";
 
-import { useDeviceMotion } from "../../hooks/useDeviceMotion";
-import { useIsTouchscreen } from "../../hooks/useIsTouchscreen";
-import { useLocalStorageObject } from "../../hooks/useLocalStorageObject";
-import { useOnMount } from "../../hooks/useOnMount";
 import {
   GuiSpellcasting,
   type GuiSpellcastingSettings,
   type ResolvedPattern,
-} from "../../render/staffGrid/guiSpellcasting";
-import { HexCoord, HexDir } from "../../render/staffGrid/hexMath";
+} from "hextools-renderer/staffGrid/guiSpellcasting";
+import { HexCoord, HexDir } from "hextools-renderer/staffGrid/hexMath";
+
+import { useDeviceMotion } from "../../hooks/useDeviceMotion";
+import { useIsTouchscreen } from "../../hooks/useIsTouchscreen";
+import { useLocalStorageObject } from "../../hooks/useLocalStorageObject";
+import { useOnMount } from "../../hooks/useOnMount";
 import { staffGridButtonProps } from "./StaffGrid.lib";
 import StaffGridSettings from "./StaffGridSettings";
 

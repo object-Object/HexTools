@@ -6,11 +6,10 @@ import {
   type Vec3Like,
   type Vec4Like,
 } from "gl-matrix";
-import _ from "lodash";
 import { createNoise3D } from "simplex-noise";
 
-import { lerp } from "../../utils/math";
 import type { BufferBuilder } from "../buffer";
+import { clamp, lerp } from "../math";
 import { HexCoord } from "./hexMath";
 
 // https://github.com/FallingColors/HexMod/blob/88f86d96f4e94473de10ca76b5d9ef34fca96c5a/Common/src/main/java/at/petrak/hexcasting/client/render/RenderLib.kt
@@ -53,11 +52,11 @@ export function drawLineSeq({
       prev[0] * next[0] + prev[1] * next[1],
     );
     joinAngles[i - 1] = angle;
-    const clamp = Math.min(prev.mag, next.mag) / (width * 0.5);
-    joinOffsets[i - 1] = _.clamp(
+    const limit = Math.min(prev.mag, next.mag) / (width * 0.5);
+    joinOffsets[i - 1] = clamp(
       Math.sin(angle) / (1 + Math.cos(angle)),
-      -clamp,
-      clamp,
+      -limit,
+      limit,
     );
   }
 

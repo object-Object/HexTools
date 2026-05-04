@@ -1,6 +1,6 @@
 {
   "experimentalOperatorPosition": "start",
-  "importOrder": ["^[./]"],
+  "importOrder": ["^hextools-", "^[./]"],
   "importOrderSeparation": true,
   "plugins": [
     "prettier-plugin-packagejson",

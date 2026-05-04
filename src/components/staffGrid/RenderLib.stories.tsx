@@ -2,12 +2,12 @@ import type { Meta, StoryObj } from "@storybook/react-vite";
 import { Mat4 } from "gl-matrix";
 import { useEffect, useRef } from "react";
 
-import { BufferBuilder } from "../../render/buffer";
+import { BufferBuilder } from "hextools-renderer/buffer";
 import {
   loadPositionColorShader,
   enablePositionColorShader,
-} from "../../render/shaders";
-import { drawLineSeq, drawSpot } from "../../render/staffGrid/renderLib";
+} from "hextools-renderer/shaders";
+import { drawLineSeq, drawSpot } from "hextools-renderer/staffGrid/renderLib";
 
 function RenderLibStory() {
   const ref = useRef<HTMLCanvasElement>(null);

@@ -1,0 +1,14 @@
+{
+  "name": "hextools-renderer",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "exports": {
+    "./*": "./src/*"
+  },
+  "dependencies": {
+    "bytebuffer": "^5.0.1",
+    "gl-matrix": "^4.0.0-beta.2",
+    "simplex-noise": "^4.0.3"
+  }
+}

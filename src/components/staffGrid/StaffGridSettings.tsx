@@ -10,9 +10,10 @@ import {
 import { useDisclosure, useMediaQuery } from "@mantine/hooks";
 import { IconSettings } from "@tabler/icons-react";
 
+import { mod } from "hextools-renderer/math";
+import type { GuiSpellcastingSettings } from "hextools-renderer/staffGrid/guiSpellcasting";
+
 import { useRequestDeviceMotionPermission } from "../../hooks/useDeviceMotion";
-import type { GuiSpellcastingSettings } from "../../render/staffGrid/guiSpellcasting";
-import { mod } from "../../utils/math";
 import type { KeysOfValue } from "../../utils/types";
 import ControlledNumberInput from "../ControlledNumberInput";
 import { staffGridButtonProps } from "./StaffGrid.lib";

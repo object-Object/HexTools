@@ -1,8 +1,7 @@
 import { Vec2, type Vec2Like } from "gl-matrix";
-import _ from "lodash";
 
-import { lerp, mod } from "../../utils/math";
 import { BufferBuilder } from "../buffer";
+import { clamp, lerp, mod } from "../math";
 import {
   enablePositionColorShader,
   loadPositionColorShader,
@@ -123,8 +122,8 @@ export class GuiSpellcasting {
   }
 
   private drawStart({ mouseX, mouseY }: MousePos) {
-    const mx = _.clamp(mouseX, 0, this.width);
-    const my = _.clamp(mouseY, 0, this.height);
+    const mx = clamp(mouseX, 0, this.width);
+    const my = clamp(mouseY, 0, this.height);
     if (this.drawState.type === "betweenPatterns") {
       const coord = this.pxToCoord(new Vec2(mx, my));
       if (!this.usedSpots.has(HexCoord.toString(coord))) {
@@ -151,8 +150,8 @@ export class GuiSpellcasting {
   }
 
   private drawMove({ mouseX, mouseY }: MousePos) {
-    const mx = _.clamp(mouseX, 0, this.width);
-    const my = _.clamp(mouseY, 0, this.height);
+    const mx = clamp(mouseX, 0, this.width);
+    const my = clamp(mouseY, 0, this.height);
 
     let anchorCoord: HexCoord;
     switch (this.drawState.type) {
@@ -169,7 +168,7 @@ export class GuiSpellcasting {
     const anchor = this.coordToPx(anchorCoord);
     const mouse = new Vec2(mx, my);
     const snapDist =
-      this.hexSize * this.hexSize * 2 * _.clamp(GRID_SNAP_THRESHOLD, 0.5, 1.0);
+      this.hexSize * this.hexSize * 2 * clamp(GRID_SNAP_THRESHOLD, 0.5, 1.0);
     if (anchor.squaredDistance(mouse) >= snapDist) {
       const delta = mouse.sub(anchor);
       const angle = Math.atan2(delta.y, delta.x);
@@ -273,7 +272,7 @@ export class GuiSpellcasting {
           if (!this.usedSpots.has(HexCoord.toString(dotCoord))) {
             const dotPx = this.coordToPx(dotCoord);
             const delta = Vec2.clone(dotPx).sub(mouseVec).mag;
-            const scaledDist = _.clamp(
+            const scaledDist = clamp(
               1
                 - (delta - this.hexSize)
                   / (settings.mouseDotsRadius * this.hexSize),
