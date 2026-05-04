@@ -198,7 +198,17 @@ export default function StaffGrid() {
 
   return (
     <>
-      <Box pos="absolute" inset="0" style={{ overflow: "hidden" }}>
+      <Box
+        pos="absolute"
+        inset="0"
+        style={{
+          overflow: "hidden",
+          // Prevent iOS select on press and hold
+          // https://stackoverflow.com/a/78378759
+          userSelect: "none",
+          WebkitUserSelect: "none",
+        }}
+      >
         <canvas
           ref={canvasRef}
           onPointerDown={handlePointerDown}
