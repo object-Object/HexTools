@@ -47,9 +47,10 @@ export class BufferBuilder {
   }
 
   color(r: number, g: number, b: number, a: number): this {
-    for (const value of [r, g, b, a]) {
-      this.buffer.writeUint8(Math.floor(value * 255));
-    }
+    this.buffer.writeUint8(Math.floor(r * 255));
+    this.buffer.writeUint8(Math.floor(g * 255));
+    this.buffer.writeUint8(Math.floor(b * 255));
+    this.buffer.writeUint8(Math.floor(a * 255));
     return this;
   }
 }
