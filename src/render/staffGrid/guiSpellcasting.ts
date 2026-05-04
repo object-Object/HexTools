@@ -25,6 +25,8 @@ export interface GuiSpellcastingSettings {
   dotsMode: "none" | "mouse" | "all";
   mouseDotsRadius: number;
   clickingTogglesDrawing: boolean;
+  shakeToClear: boolean;
+  zappyOnShake: boolean;
 }
 
 // https://github.com/FallingColors/HexMod/blob/724c36bba6a97f97d16f95d16f7addb700e62443/Common/src/main/java/at/petrak/hexcasting/client/gui/GuiSpellcasting.kt
@@ -237,10 +239,12 @@ export class GuiSpellcasting {
   render({
     isCtrlDown,
     timestamp,
+    zappyMultiplier = 1,
     ...mousePos
   }: MousePos & {
     isCtrlDown: boolean;
     timestamp: DOMHighResTimeStamp;
+    zappyMultiplier?: number;
   }) {
     const { mouseX, mouseY } = this.scaleMousePos(mousePos);
     const { gl, buf, settings } = this;
@@ -324,7 +328,7 @@ export class GuiSpellcasting {
       buf,
       mat,
       hops: 10,
-      variance: settings.zappyVariance,
+      variance: settings.zappyVariance * zappyMultiplier,
       speed: 0.1,
       readabilityOffset: 0.2,
       lastSegmentLenProportion: 1,
@@ -339,7 +343,7 @@ export class GuiSpellcasting {
         drawLast: true,
         tail: [115 / 255, 133 / 255, 222 / 255, 1],
         head: [254 / 255, 203 / 255, 230 / 255, 1],
-        flowIrregular: 0.2,
+        flowIrregular: 0.2 * zappyMultiplier,
         seed: i,
         ...commonPatternOptions,
       });
@@ -366,7 +370,7 @@ export class GuiSpellcasting {
         drawLast: false,
         tail: [100 / 255, 200 / 255, 1, 1],
         head: [254 / 255, 203 / 255, 230 / 255, 1],
-        flowIrregular: 0.1,
+        flowIrregular: 0.1 * zappyMultiplier,
         seed: this.patterns.length,
         ...commonPatternOptions,
       });
@@ -403,6 +407,8 @@ export class GuiSpellcasting {
       dotsMode: isTouchscreen ? "all" : "mouse",
       mouseDotsRadius: 3,
       clickingTogglesDrawing: false,
+      shakeToClear: false,
+      zappyOnShake: false,
     };
   }
 }

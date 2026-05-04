@@ -8,8 +8,10 @@ import {
   IconTrash,
   IconX,
 } from "@tabler/icons-react";
+import _ from "lodash";
 import React, { useEffect, useRef } from "react";
 
+import { useDeviceMotion } from "../../hooks/useDeviceMotion";
 import { useIsTouchscreen } from "../../hooks/useIsTouchscreen";
 import { useLocalStorageObject } from "../../hooks/useLocalStorageObject";
 import { useOnMount } from "../../hooks/useOnMount";
@@ -45,6 +47,7 @@ export default function StaffGrid() {
   const mouseXRef = useRef(0);
   const mouseYRef = useRef(0);
   const isCtrlDownRef = useRef(false);
+  const zappyMultiplierRef = useRef(0);
 
   useHotkeys([
     ["Escape", () => guiRef.current?.mouseCanceled()],
@@ -52,6 +55,21 @@ export default function StaffGrid() {
     ["mod+Y", () => patternsHandlers.forward()],
     ["mod+shift+Z", () => patternsHandlers.forward()],
   ]);
+
+  useDeviceMotion({
+    shakeDuration: 1500,
+    shakeThreshold: 15,
+    onMeanAcceleration: (meanAcceleration) => {
+      zappyMultiplierRef.current = settings.zappyOnShake
+        ? _.clamp(meanAcceleration / 5, 1, 3)
+        : 1;
+    },
+    onShake: () => {
+      if (settings.shakeToClear) {
+        patternsHandlers.set([]);
+      }
+    },
+  });
 
   const updateMouseRefs = (event: React.PointerEvent) => {
     if (!canvasRef.current || !event.isPrimary) return false;
@@ -136,6 +154,7 @@ export default function StaffGrid() {
         mouseY: mouseYRef.current,
         isCtrlDown: isCtrlDownRef.current,
         timestamp,
+        zappyMultiplier: zappyMultiplierRef.current,
       });
       requestAnimationFrame(handleAnimationFrame);
     };

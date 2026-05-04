@@ -10,6 +10,7 @@ import {
 import { useDisclosure } from "@mantine/hooks";
 import { IconSettings } from "@tabler/icons-react";
 
+import { useRequestDeviceMotionPermission } from "../../hooks/useDeviceMotion";
 import type { GuiSpellcastingSettings } from "../../render/staffGrid/guiSpellcasting";
 import { mod } from "../../utils/math";
 import type { KeysOfValue } from "../../utils/types";
@@ -33,9 +34,16 @@ export default function StaffGridSettings({
     dotsMode,
     mouseDotsRadius,
     clickingTogglesDrawing,
+    shakeToClear,
+    zappyOnShake,
   } = settings;
 
   const [opened, { open, close }] = useDisclosure(false);
+
+  const {
+    canRequestPermission: canRequestMotionPermission,
+    requestPermission: requestMotionPermission,
+  } = useRequestDeviceMotionPermission();
 
   function getSetter<T extends keyof GuiSpellcastingSettings>(
     key: T,
@@ -55,6 +63,8 @@ export default function StaffGridSettings({
   }
 
   const setGuiScale = getSetter("guiScale");
+  const setShakeToClear = getSetter("shakeToClear");
+  const setZappyOnShake = getSetter("zappyOnShake");
 
   return (
     <>
@@ -96,6 +106,40 @@ export default function StaffGridSettings({
             label="Clicking Toggles Drawing"
             checked={clickingTogglesDrawing}
             onChange={getSwitchSetter("clickingTogglesDrawing")}
+          />
+
+          <Switch
+            label="Shake To Clear Grid"
+            checked={canRequestMotionPermission && shakeToClear}
+            disabled={!canRequestMotionPermission}
+            error={
+              !canRequestMotionPermission
+              && "Device motion permission denied :("
+            }
+            // eslint-disable-next-line @typescript-eslint/no-misused-promises
+            onChange={async (value) => {
+              setShakeToClear(
+                value.currentTarget.checked
+                  && (await requestMotionPermission()),
+              );
+            }}
+          />
+
+          <Switch
+            label="Wobble On Shake"
+            checked={canRequestMotionPermission && zappyOnShake}
+            disabled={!canRequestMotionPermission}
+            error={
+              !canRequestMotionPermission
+              && "Device motion permission denied :("
+            }
+            // eslint-disable-next-line @typescript-eslint/no-misused-promises
+            onChange={async (value) => {
+              setZappyOnShake(
+                value.currentTarget.checked
+                  && (await requestMotionPermission()),
+              );
+            }}
           />
 
           <InputWrapper label="Grid Dots Mode" labelElement="div">
