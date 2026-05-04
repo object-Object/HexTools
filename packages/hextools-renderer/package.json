@@ -10,5 +10,8 @@
     "bytebuffer": "^5.0.1",
     "gl-matrix": "^4.0.0-beta.2",
     "simplex-noise": "^4.0.3"
+  },
+  "devDependencies": {
+    "@types/bytebuffer": "^5.0.49"
   }
 }
