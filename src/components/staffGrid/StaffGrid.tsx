@@ -9,7 +9,7 @@ import {
   IconX,
 } from "@tabler/icons-react";
 import _ from "lodash";
-import React, { useEffect, useRef } from "react";
+import React, { useEffect, useEffectEvent, useRef } from "react";
 
 import {
   GuiSpellcasting,
@@ -21,7 +21,6 @@ import { HexCoord, HexDir } from "hextools-renderer/staffGrid/hexMath";
 import { useDeviceMotion } from "../../hooks/useDeviceMotion";
 import { useIsTouchscreen } from "../../hooks/useIsTouchscreen";
 import { useLocalStorageObject } from "../../hooks/useLocalStorageObject";
-import { useOnMount } from "../../hooks/useOnMount";
 import { staffGridButtonProps } from "./StaffGrid.lib";
 import StaffGridSettings from "./StaffGridSettings";
 
@@ -136,7 +135,7 @@ export default function StaffGrid() {
     isCtrlDownRef.current = event.ctrlKey;
   };
 
-  useOnMount(() => {
+  const setupGui = useEffectEvent(() => {
     if (!canvasRef.current) {
       throw new Error("Ref not loaded");
     }
@@ -174,6 +173,10 @@ export default function StaffGrid() {
       isMounted = false;
     };
   });
+
+  useEffect(() => {
+    setupGui();
+  }, []);
 
   useEffect(() => {
     document.addEventListener("keydown", handleKeyDown);
