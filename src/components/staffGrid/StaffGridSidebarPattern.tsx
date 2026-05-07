@@ -14,7 +14,7 @@ export default function StaffGridSidebarPattern({
 }: StaffGridSidebarPatternProps) {
   const text = pattern.toString();
   return (
-    <Group align="center" wrap="nowrap" gap="xs">
+    <Group align="center" wrap="nowrap" gap="sm">
       <Text
         ff="monospace"
         style={{

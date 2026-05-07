@@ -1,4 +1,5 @@
 import {
+  Accordion,
   ActionIcon,
   Button,
   InputWrapper,
@@ -8,7 +9,7 @@ import {
   Switch,
 } from "@mantine/core";
 import { useDisclosure, useMediaQuery } from "@mantine/hooks";
-import { IconSettings } from "@tabler/icons-react";
+import { IconChevronRight, IconSettings } from "@tabler/icons-react";
 
 import { mod } from "hextools-renderer/math";
 import type { GuiSpellcastingSettings } from "hextools-renderer/staffGrid/guiSpellcasting";
@@ -17,6 +18,7 @@ import { useRequestDeviceMotionPermission } from "../../hooks/useDeviceMotion";
 import type { KeysOfValue } from "../../utils/types";
 import ControlledNumberInput from "../ControlledNumberInput";
 import { staffGridButtonProps } from "./StaffGrid.lib";
+import styles from "./StaffGridSettings.module.css";
 
 export interface StaffGridSettingsProps {
   settings: GuiSpellcastingSettings;
@@ -109,28 +111,19 @@ export default function StaffGridSettings({
           />
 
           {enableZappyPoints && (
-            <>
-              <Switch
-                label="Patterns Wobble On Shake"
-                checked={zappyOnShake}
-                disabled={!canRequestMotionPermission}
-                error={requestMotionPermissionError}
-                // eslint-disable-next-line @typescript-eslint/no-misused-promises
-                onChange={async (value) => {
-                  setZappyOnShake(
-                    value.currentTarget.checked
-                      && (await requestMotionPermission()),
-                  );
-                }}
-              />
-              <ControlledNumberInput
-                label="Pattern Wobbliness"
-                value={zappyVariance}
-                onChange={getSetter("zappyVariance")}
-                allowNegative={false}
-                step={0.1}
-              />
-            </>
+            <Switch
+              label="Patterns Wobble On Shake"
+              checked={zappyOnShake}
+              disabled={!canRequestMotionPermission}
+              error={requestMotionPermissionError}
+              // eslint-disable-next-line @typescript-eslint/no-misused-promises
+              onChange={async (value) => {
+                setZappyOnShake(
+                  value.currentTarget.checked
+                    && (await requestMotionPermission()),
+                );
+              }}
+            />
           )}
 
           <Switch
@@ -183,20 +176,47 @@ export default function StaffGridSettings({
             />
           </InputWrapper>
 
-          {dotsMode === "mouse" && (
-            <ControlledNumberInput
-              label="Mouse Dots Radius"
-              value={mouseDotsRadius}
-              onChange={getSetter("mouseDotsRadius")}
-              allowNegative={false}
-              allowDecimal={false}
-              min={1}
-            />
-          )}
+          <Accordion
+            variant="unstyled"
+            classNames={{ chevron: styles.chevron }}
+            chevron={<IconChevronRight />}
+            chevronPosition="left"
+          >
+            <Accordion.Item value="value">
+              <Accordion.Control>Advanced Settings</Accordion.Control>
+              <Accordion.Panel>
+                {enableZappyPoints && (
+                  <ControlledNumberInput
+                    label="Pattern Wobbliness"
+                    value={zappyVariance}
+                    onChange={getSetter("zappyVariance")}
+                    allowNegative={false}
+                    step={0.1}
+                  />
+                )}
 
-          <Button variant="light" color="red" onClick={onResetSettings}>
-            Reset All Settings
-          </Button>
+                {dotsMode === "mouse" && (
+                  <ControlledNumberInput
+                    label="Mouse Dots Radius"
+                    value={mouseDotsRadius}
+                    onChange={getSetter("mouseDotsRadius")}
+                    allowNegative={false}
+                    allowDecimal={false}
+                    min={1}
+                  />
+                )}
+
+                <Button
+                  mt="md"
+                  variant="light"
+                  color="red"
+                  onClick={onResetSettings}
+                >
+                  Reset All Settings
+                </Button>
+              </Accordion.Panel>
+            </Accordion.Item>
+          </Accordion>
         </Stack>
       </Modal>
 
