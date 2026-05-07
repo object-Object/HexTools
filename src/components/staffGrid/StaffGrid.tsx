@@ -1,13 +1,5 @@
-import { ActionIcon, Box, Drawer, Group, Stack, Text } from "@mantine/core";
-import { useDisclosure, useHotkeys, useStateHistory } from "@mantine/hooks";
-import {
-  IconArrowBackUp,
-  IconArrowForwardUp,
-  IconCopy,
-  IconMenu2,
-  IconTrash,
-  IconX,
-} from "@tabler/icons-react";
+import { Box } from "@mantine/core";
+import { useHotkeys, useStateHistory } from "@mantine/hooks";
 import _ from "lodash";
 import React, { useEffect, useEffectEvent, useRef } from "react";
 
@@ -16,19 +8,14 @@ import {
   type GuiSpellcastingSettings,
   type ResolvedPattern,
 } from "hextools-renderer/staffGrid/guiSpellcasting";
-import { HexCoord, HexDir } from "hextools-renderer/staffGrid/hexMath";
 
 import { useDeviceMotion } from "../../hooks/useDeviceMotion";
 import { useIsTouchscreen } from "../../hooks/useIsTouchscreen";
 import { useLocalStorageObject } from "../../hooks/useLocalStorageObject";
-import { staffGridButtonProps } from "./StaffGrid.lib";
-import StaffGridSettings from "./StaffGridSettings";
+import StaffGridControls from "./StaffGridControls";
 
 export default function StaffGrid() {
   const isTouchscreen = useIsTouchscreen();
-
-  const [sidebarOpen, { toggle: toggleSidebar, close: closeSidebar }] =
-    useDisclosure(false);
 
   const [patterns, patternsHandlers, patternsHistory] = useStateHistory<
     ResolvedPattern[]
@@ -222,95 +209,14 @@ export default function StaffGrid() {
         />
       </Box>
 
-      <Drawer
-        title="Patterns"
-        position="right"
-        opened={sidebarOpen}
-        onClose={closeSidebar}
-      >
-        <Stack gap="xs">
-          {patterns.map(({ pattern, origin }, index) => {
-            const signature = pattern.anglesSignature();
-            const text = `${HexDir[pattern.startDir]} ${signature}`;
-            return (
-              <Group
-                key={HexCoord.toString(origin)}
-                align="center"
-                wrap="nowrap"
-                gap="xs"
-              >
-                <Text
-                  ff="monospace"
-                  style={{
-                    textWrap: "nowrap",
-                    overflow: "hidden",
-                    textOverflow: "ellipsis",
-                  }}
-                >
-                  {text}
-                </Text>
-
-                <ActionIcon
-                  variant="transparent"
-                  size="sm"
-                  ml="auto"
-                  onClick={() => void navigator.clipboard.writeText(text)}
-                >
-                  <IconCopy />
-                </ActionIcon>
-
-                <ActionIcon
-                  variant="transparent"
-                  size="sm"
-                  onClick={() =>
-                    patternsHandlers.set(patterns.filter((_, i) => i !== index))
-                  }
-                >
-                  <IconX />
-                </ActionIcon>
-              </Group>
-            );
-          })}
-        </Stack>
-      </Drawer>
-
-      <Stack gap="xs" pos="absolute" top={16} right={16}>
-        <StaffGridSettings
-          settings={settings}
-          onSettingsChange={setSettings}
-          onResetSettings={() => setSettings(defaultSettings)}
-        />
-
-        <ActionIcon {...staffGridButtonProps} onClick={toggleSidebar}>
-          <IconMenu2 />
-        </ActionIcon>
-
-        <ActionIcon
-          {...staffGridButtonProps}
-          onClick={() => patternsHandlers.back()}
-          disabled={patternsHistory.current === 0}
-        >
-          <IconArrowBackUp />
-        </ActionIcon>
-
-        <ActionIcon
-          {...staffGridButtonProps}
-          onClick={() => patternsHandlers.forward()}
-          disabled={
-            patternsHistory.current === patternsHistory.history.length - 1
-          }
-        >
-          <IconArrowForwardUp />
-        </ActionIcon>
-
-        <ActionIcon
-          {...staffGridButtonProps}
-          onClick={() => patternsHandlers.set([])}
-          disabled={patterns.length === 0}
-        >
-          <IconTrash />
-        </ActionIcon>
-      </Stack>
+      <StaffGridControls
+        patterns={patterns}
+        patternsHandlers={patternsHandlers}
+        patternsHistory={patternsHistory}
+        settings={settings}
+        onSettingsChange={setSettings}
+        onResetSettings={() => setSettings(defaultSettings)}
+      />
     </>
   );
 }
