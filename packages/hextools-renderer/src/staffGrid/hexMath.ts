@@ -76,6 +76,10 @@ export namespace HexDir {
   export function angleFrom(dir: HexDir, other: HexDir): HexAngle {
     return mod(dir - other, 6);
   }
+
+  export function toShorthand(dir: HexDir): string {
+    return dirToShorthand[dir];
+  }
 }
 
 const dirToDelta: Record<HexDir, HexCoord> = {
@@ -85,6 +89,15 @@ const dirToDelta: Record<HexDir, HexCoord> = {
   [HexDir.SOUTH_WEST]: { q: -1, r: 1 },
   [HexDir.WEST]: { q: -1, r: 0 },
   [HexDir.NORTH_WEST]: { q: 0, r: -1 },
+};
+
+const dirToShorthand: Record<HexDir, string> = {
+  [HexDir.NORTH_EAST]: "ne",
+  [HexDir.EAST]: "e",
+  [HexDir.SOUTH_EAST]: "se",
+  [HexDir.SOUTH_WEST]: "sw",
+  [HexDir.WEST]: "w",
+  [HexDir.NORTH_WEST]: "nw",
 };
 
 export enum HexAngle {
@@ -161,5 +174,15 @@ export class HexPattern {
 
   anglesSignature(): string {
     return this.angles.map((angle) => angleToLetter[angle]).join("");
+  }
+
+  toString(): string {
+    const signature = this.anglesSignature();
+    return `${HexDir[this.startDir]} ${signature}`;
+  }
+
+  toShorthand(): string {
+    const signature = this.anglesSignature();
+    return `${HexDir.toShorthand(this.startDir)} ${signature}`;
   }
 }

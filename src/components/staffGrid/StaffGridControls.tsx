@@ -1,4 +1,12 @@
-import { ActionIcon, Drawer, Group, Stack, Text } from "@mantine/core";
+import {
+  ActionIcon,
+  Button,
+  Drawer,
+  Group,
+  Popover,
+  Stack,
+  Text,
+} from "@mantine/core";
 import {
   useDisclosure,
   type UseStateHistoryHandlers,
@@ -7,21 +15,21 @@ import {
 import {
   IconArrowBackUp,
   IconArrowForwardUp,
-  IconCopy,
   IconMenu2,
+  IconShare2,
   IconTrash,
-  IconX,
 } from "@tabler/icons-react";
-import _ from "lodash";
+import { useState } from "react";
 
 import {
   type GuiSpellcastingSettings,
   type ResolvedPattern,
 } from "hextools-renderer/staffGrid/guiSpellcasting";
-import { HexCoord, HexDir } from "hextools-renderer/staffGrid/hexMath";
+import { HexCoord } from "hextools-renderer/staffGrid/hexMath";
 
 import { staffGridButtonProps } from "./StaffGrid.lib";
 import StaffGridSettings from "./StaffGridSettings";
+import StaffGridSidebarPattern from "./StaffGridSidebarPattern";
 
 export interface StaffGridControlsProps {
   patterns: ResolvedPattern[];
@@ -42,6 +50,13 @@ export default function StaffGridControls({
 }: StaffGridControlsProps) {
   const [sidebarOpen, { toggle: toggleSidebar, close: closeSidebar }] =
     useDisclosure(false);
+
+  const [popoverOpen, setPopoverOpen] = useState(false);
+
+  const copyAndClosePopover = (text: string) => {
+    void navigator.clipboard.writeText(text);
+    setPopoverOpen(false);
+  };
 
   return (
     <>
@@ -84,54 +99,68 @@ export default function StaffGridControls({
       </Stack>
 
       <Drawer
-        title="Patterns"
+        title={
+          <Group gap="md">
+            <Text fw="bold">Patterns</Text>
+            {patterns.length > 0 && (
+              <Popover opened={popoverOpen} onChange={setPopoverOpen}>
+                <Popover.Target>
+                  <ActionIcon
+                    variant="transparent"
+                    size="sm"
+                    onClick={() => setPopoverOpen((open) => !open)}
+                  >
+                    <IconShare2 />
+                  </ActionIcon>
+                </Popover.Target>
+
+                <Popover.Dropdown>
+                  <Stack gap="sm">
+                    <Button
+                      variant="default"
+                      onClick={() =>
+                        copyAndClosePopover(
+                          patterns
+                            .map(({ pattern }) => pattern.toString())
+                            .join("\n"),
+                        )
+                      }
+                    >
+                      Copy angle signatures
+                    </Button>
+
+                    <Button
+                      variant="default"
+                      onClick={() =>
+                        copyAndClosePopover(
+                          `/patterns hex hex:${patterns.map(({ pattern }) => pattern.toShorthand()).join(",")}`,
+                        )
+                      }
+                    >
+                      Copy HexBug command
+                    </Button>
+                  </Stack>
+                </Popover.Dropdown>
+              </Popover>
+            )}
+          </Group>
+        }
         position="right"
         opened={sidebarOpen}
         onClose={closeSidebar}
       >
         <Stack gap="xs">
-          {patterns.map(({ pattern, origin }, index) => {
-            const signature = pattern.anglesSignature();
-            const text = `${HexDir[pattern.startDir]} ${signature}`;
-            return (
-              <Group
-                key={HexCoord.toString(origin)}
-                align="center"
-                wrap="nowrap"
-                gap="xs"
-              >
-                <Text
-                  ff="monospace"
-                  style={{
-                    textWrap: "nowrap",
-                    overflow: "hidden",
-                    textOverflow: "ellipsis",
-                  }}
-                >
-                  {text}
-                </Text>
-
-                <ActionIcon
-                  variant="transparent"
-                  size="sm"
-                  ml="auto"
-                  onClick={() => void navigator.clipboard.writeText(text)}
-                >
-                  <IconCopy />
-                </ActionIcon>
-
-                <ActionIcon
-                  variant="transparent"
-                  size="sm"
-                  onClick={() =>
-                    patternsHandlers.set(patterns.filter((_, i) => i !== index))
-                  }
-                >
-                  <IconX />
-                </ActionIcon>
-              </Group>
-            );
-          })}
+          {patterns.map(({ pattern, origin }, index) => (
+            <StaffGridSidebarPattern
+              key={HexCoord.toString(origin)}
+              pattern={pattern}
+              onDelete={() => {
+                patternsHandlers.set(
+                  patterns.filter((_resolved, i) => i !== index),
+                );
+              }}
+            />
+          ))}
         </Stack>
       </Drawer>
     </>
