@@ -35,7 +35,9 @@ export default defineConfig([
         "warn",
         {
           argsIgnorePattern: "^_[^_].*$|^_$",
-          varsIgnorePattern: "^_[^_].*$|^_$",
+          // Require at least one character after var name
+          // so unused lodash import is linted
+          varsIgnorePattern: "^_[^_].*$",
           caughtErrorsIgnorePattern: "^_[^_].*$|^_$",
         },
       ],
