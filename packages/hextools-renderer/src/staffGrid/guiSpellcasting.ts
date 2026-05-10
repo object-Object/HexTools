@@ -68,11 +68,11 @@ export class GuiSpellcasting {
   }
 
   get width() {
-    return this.scaleValue(this.gl.canvas.width);
+    return Math.max(this.scaleValue(this.gl.canvas.width), 1);
   }
 
   get height() {
-    return this.scaleValue(this.gl.canvas.height);
+    return Math.max(this.scaleValue(this.gl.canvas.height), 1);
   }
 
   scaleMousePos({ mouseX, mouseY }: MousePos): MousePos {
