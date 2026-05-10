@@ -4,14 +4,32 @@
   "private": true,
   "type": "module",
   "exports": {
-    "./*": "./src/*"
+    ".": {
+      "types": "./src/index.ts",
+      "require": "./dist/index.cjs",
+      "import": "./dist/index.js"
+    },
+    "./shaders": {
+      "types": "./src/shaders/index.ts",
+      "require": "./dist/shaders/index.cjs",
+      "import": "./dist/shaders/index.js"
+    },
+    "./staffGrid": {
+      "types": "./src/staffGrid/index.ts",
+      "require": "./dist/staffGrid/index.cjs",
+      "import": "./dist/staffGrid/index.js"
+    }
   },
+  "main": "./dist/index.cjs",
+  "module": "./dist/index.js",
+  "types": "./src/index.ts",
   "dependencies": {
     "bytebuffer": "^5.0.1",
     "gl-matrix": "^4.0.0-beta.2",
     "simplex-noise": "^4.0.3"
   },
   "devDependencies": {
-    "@types/bytebuffer": "^5.0.49"
+    "@types/bytebuffer": "^5.0.49",
+    "vite": "^8.0.0-beta.13"
   }
 }

@@ -22,12 +22,7 @@
     "noUnusedParameters": false,
     "erasableSyntaxOnly": false,
     "noFallthroughCasesInSwitch": true,
-    "noUncheckedSideEffectImports": true,
-
-    /* Workspace path overrides */
-    "paths": {
-      "hextools-renderer/*": ["./packages/hextools-renderer/src/*"]
-    }
+    "noUncheckedSideEffectImports": true
   },
   "include": ["src", "packages/*/src"]
 }

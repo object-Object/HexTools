@@ -11,8 +11,8 @@ import {
 import { useDisclosure, useMediaQuery } from "@mantine/hooks";
 import { IconChevronRight, IconSettings } from "@tabler/icons-react";
 
-import { mod } from "hextools-renderer/math";
-import type { GuiSpellcastingSettings } from "hextools-renderer/staffGrid/guiSpellcasting";
+import { mod } from "hextools-renderer";
+import type { GuiSpellcastingSettings } from "hextools-renderer/staffGrid";
 
 import { useRequestDeviceMotionPermission } from "../../hooks/useDeviceMotion";
 import type { KeysOfValue } from "../../utils/types";

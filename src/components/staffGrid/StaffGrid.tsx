@@ -7,7 +7,7 @@ import {
   GuiSpellcasting,
   type GuiSpellcastingSettings,
   type ResolvedPattern,
-} from "hextools-renderer/staffGrid/guiSpellcasting";
+} from "hextools-renderer/staffGrid";
 
 import { useDeviceMotion } from "../../hooks/useDeviceMotion";
 import { useIsTouchscreen } from "../../hooks/useIsTouchscreen";

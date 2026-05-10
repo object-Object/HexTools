@@ -22,10 +22,10 @@ import {
 import { useState } from "react";
 
 import {
+  HexCoord,
   type GuiSpellcastingSettings,
   type ResolvedPattern,
-} from "hextools-renderer/staffGrid/guiSpellcasting";
-import { HexCoord } from "hextools-renderer/staffGrid/hexMath";
+} from "hextools-renderer/staffGrid";
 
 import { staffGridButtonProps } from "./StaffGrid.lib";
 import StaffGridSettings from "./StaffGridSettings";
