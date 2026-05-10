@@ -728,6 +728,71 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@hextools/app@workspace:.":
+  version: 0.0.0-use.local
+  resolution: "@hextools/app@workspace:."
+  dependencies:
+    "@dnd-kit/dom": "npm:^0.4.0"
+    "@dnd-kit/helpers": "npm:^0.4.0"
+    "@dnd-kit/react": "npm:^0.4.0"
+    "@eslint/js": "npm:^9.39.1"
+    "@hextools/renderer": "workspace:^"
+    "@mantine/core": "npm:^9.1.0"
+    "@mantine/hooks": "npm:^9.1.0"
+    "@storybook/addon-themes": "npm:^10.2.8"
+    "@storybook/react-vite": "npm:^10.2.8"
+    "@tabler/icons-react": "npm:^3.36.1"
+    "@trivago/prettier-plugin-sort-imports": "npm:^5.2.2"
+    "@types/lodash": "npm:^4.17.24"
+    "@types/node": "npm:^24.10.1"
+    "@types/react": "npm:^19.2.7"
+    "@types/react-dom": "npm:^19.2.3"
+    "@vitejs/plugin-react": "npm:^5.1.1"
+    "@yarnpkg/types": "npm:^4.0.1"
+    babel-plugin-react-compiler: "npm:^1.0.0"
+    cross-env: "npm:^10.1.0"
+    eslint: "npm:^9.39.1"
+    eslint-plugin-react-dom: "npm:^2.2.3"
+    eslint-plugin-react-hooks: "npm:^7.0.1"
+    eslint-plugin-react-refresh: "npm:^0.4.24"
+    eslint-plugin-react-x: "npm:^2.2.3"
+    eslint-plugin-storybook: "npm:^10.2.8"
+    gl-matrix: "npm:^4.0.0-beta.2"
+    globals: "npm:^16.5.0"
+    lodash: "npm:^4.18.1"
+    npm-run-all: "npm:^4.1.5"
+    postcss: "npm:^8.5.6"
+    postcss-preset-mantine: "npm:^1.18.0"
+    postcss-simple-vars: "npm:^7.0.1"
+    prettier: "npm:^3.6.2"
+    prettier-plugin-packagejson: "npm:^3.0.0"
+    react: "npm:^19.2.0"
+    react-dom: "npm:^19.2.0"
+    storybook: "npm:^10.2.8"
+    typescript: "npm:~5.9.3"
+    typescript-eslint: "npm:^8.48.0"
+    vite: "npm:^8.0.0-beta.13"
+    wouter: "npm:^3.9.0"
+  dependenciesMeta:
+    "@trivago/prettier-plugin-sort-imports@5.2.2":
+      unplugged: true
+    prettier-plugin-packagejson@3.0.0:
+      unplugged: true
+  languageName: unknown
+  linkType: soft
+
+"@hextools/renderer@workspace:^, @hextools/renderer@workspace:packages/@hextools/renderer":
+  version: 0.0.0-use.local
+  resolution: "@hextools/renderer@workspace:packages/@hextools/renderer"
+  dependencies:
+    "@types/bytebuffer": "npm:^5.0.49"
+    bytebuffer: "npm:^5.0.1"
+    gl-matrix: "npm:^4.0.0-beta.2"
+    simplex-noise: "npm:^4.0.3"
+    vite: "npm:^8.0.0-beta.13"
+  languageName: unknown
+  linkType: soft
+
 "@humanfs/core@npm:^0.19.1":
   version: 0.19.1
   resolution: "@humanfs/core@npm:0.19.1"
@@ -2981,71 +3046,6 @@ __metadata:
   checksum: 10c0/3abaa4c6f1bcc25273f267297a89a4904963ea29af19b8e4f6eabe04f1c2c7e9abd7bfc4730ddb1d58f2ea04b6fee74053d8bddb5656ec6ebf6c79cc8d14202c
   languageName: node
   linkType: hard
-
-"hextools-renderer@workspace:^, hextools-renderer@workspace:packages/hextools-renderer":
-  version: 0.0.0-use.local
-  resolution: "hextools-renderer@workspace:packages/hextools-renderer"
-  dependencies:
-    "@types/bytebuffer": "npm:^5.0.49"
-    bytebuffer: "npm:^5.0.1"
-    gl-matrix: "npm:^4.0.0-beta.2"
-    simplex-noise: "npm:^4.0.3"
-    vite: "npm:^8.0.0-beta.13"
-  languageName: unknown
-  linkType: soft
-
-"hextools@workspace:.":
-  version: 0.0.0-use.local
-  resolution: "hextools@workspace:."
-  dependencies:
-    "@dnd-kit/dom": "npm:^0.4.0"
-    "@dnd-kit/helpers": "npm:^0.4.0"
-    "@dnd-kit/react": "npm:^0.4.0"
-    "@eslint/js": "npm:^9.39.1"
-    "@mantine/core": "npm:^9.1.0"
-    "@mantine/hooks": "npm:^9.1.0"
-    "@storybook/addon-themes": "npm:^10.2.8"
-    "@storybook/react-vite": "npm:^10.2.8"
-    "@tabler/icons-react": "npm:^3.36.1"
-    "@trivago/prettier-plugin-sort-imports": "npm:^5.2.2"
-    "@types/lodash": "npm:^4.17.24"
-    "@types/node": "npm:^24.10.1"
-    "@types/react": "npm:^19.2.7"
-    "@types/react-dom": "npm:^19.2.3"
-    "@vitejs/plugin-react": "npm:^5.1.1"
-    "@yarnpkg/types": "npm:^4.0.1"
-    babel-plugin-react-compiler: "npm:^1.0.0"
-    cross-env: "npm:^10.1.0"
-    eslint: "npm:^9.39.1"
-    eslint-plugin-react-dom: "npm:^2.2.3"
-    eslint-plugin-react-hooks: "npm:^7.0.1"
-    eslint-plugin-react-refresh: "npm:^0.4.24"
-    eslint-plugin-react-x: "npm:^2.2.3"
-    eslint-plugin-storybook: "npm:^10.2.8"
-    gl-matrix: "npm:^4.0.0-beta.2"
-    globals: "npm:^16.5.0"
-    hextools-renderer: "workspace:^"
-    lodash: "npm:^4.18.1"
-    npm-run-all: "npm:^4.1.5"
-    postcss: "npm:^8.5.6"
-    postcss-preset-mantine: "npm:^1.18.0"
-    postcss-simple-vars: "npm:^7.0.1"
-    prettier: "npm:^3.6.2"
-    prettier-plugin-packagejson: "npm:^3.0.0"
-    react: "npm:^19.2.0"
-    react-dom: "npm:^19.2.0"
-    storybook: "npm:^10.2.8"
-    typescript: "npm:~5.9.3"
-    typescript-eslint: "npm:^8.48.0"
-    vite: "npm:^8.0.0-beta.13"
-    wouter: "npm:^3.9.0"
-  dependenciesMeta:
-    "@trivago/prettier-plugin-sort-imports@5.2.2":
-      unplugged: true
-    prettier-plugin-packagejson@3.0.0:
-      unplugged: true
-  languageName: unknown
-  linkType: soft
 
 "hosted-git-info@npm:^2.1.4":
   version: 2.8.9

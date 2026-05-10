@@ -6,9 +6,9 @@ import { defineConfig } from "vite";
 export default defineConfig({
   resolve: {
     alias: {
-      "hextools-renderer": resolve(
+      "@hextools/renderer": resolve(
         import.meta.dirname,
-        "./packages/hextools-renderer/src",
+        "./packages/@hextools/renderer/src",
       ),
     },
   },

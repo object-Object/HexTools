@@ -2,7 +2,7 @@
 module.exports = {
   endOfLine: "auto",
   experimentalOperatorPosition: "start",
-  importOrder: ["^hextools-", "^[./]"],
+  importOrder: ["^@hextools/", "^[./]"],
   importOrderSeparation: true,
   plugins: [
     // https://dev.to/javien/how-to-use-prettier-plugin-with-yarn-pnp-in-vscode-4pf8

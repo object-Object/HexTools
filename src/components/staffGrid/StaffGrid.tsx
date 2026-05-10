@@ -1,13 +1,12 @@
-import { Box } from "@mantine/core";
-import { useHotkeys, useStateHistory } from "@mantine/hooks";
-import _ from "lodash";
-import React, { useEffect, useEffectEvent, useRef } from "react";
-
 import {
   GuiSpellcasting,
   type GuiSpellcastingSettings,
   type ResolvedPattern,
-} from "hextools-renderer/staffGrid";
+} from "@hextools/renderer/staffGrid";
+import { Box } from "@mantine/core";
+import { useHotkeys, useStateHistory } from "@mantine/hooks";
+import _ from "lodash";
+import React, { useEffect, useEffectEvent, useRef } from "react";
 
 import { useDeviceMotion } from "../../hooks/useDeviceMotion";
 import { useIsTouchscreen } from "../../hooks/useIsTouchscreen";

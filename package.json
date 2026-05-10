@@ -1,15 +1,15 @@
 {
-  "name": "hextools",
+  "name": "@hextools/app",
   "version": "0.0.0",
   "private": true,
   "type": "module",
   "workspaces": [
-    "packages/*"
+    "packages/@hextools/*"
   ],
   "scripts": {
     "build": "tsc -b && vite build",
     "build-packages": "run-p 'build-packages:*'",
-    "build-packages:hextools-renderer": "vite build packages/hextools-renderer",
+    "build-packages:renderer": "vite build packages/@hextools/renderer",
     "build-storybook": "storybook build",
     "dev": "vite",
     "lint": "run-p 'lint:*'",
@@ -26,11 +26,11 @@
     "@dnd-kit/dom": "^0.4.0",
     "@dnd-kit/helpers": "^0.4.0",
     "@dnd-kit/react": "^0.4.0",
+    "@hextools/renderer": "workspace:^",
     "@mantine/core": "^9.1.0",
     "@mantine/hooks": "^9.1.0",
     "@tabler/icons-react": "^3.36.1",
     "gl-matrix": "^4.0.0-beta.2",
-    "hextools-renderer": "workspace:^",
     "lodash": "^4.18.1",
     "react": "^19.2.0",
     "react-dom": "^19.2.0",
