@@ -9,7 +9,7 @@ on:
   workflow_dispatch:
 
 jobs:
-  build:
+  build-app:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v6
@@ -28,13 +28,22 @@ jobs:
       - name: Check Yarn constraints
         run: yarn constraints
 
-      - name: Build
+      - name: Build app
         run: yarn build
+
+      - name: Build packages
+        run: yarn build-packages
 
       - name: Upload GitHub Pages artifact
         uses: actions/upload-pages-artifact@v4
         with:
           path: dist
+
+      - name: Upload packages artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: packages
+          path: packages
 
   eslint:
     runs-on: ubuntu-latest
