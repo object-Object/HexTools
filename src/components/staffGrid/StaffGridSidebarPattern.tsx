@@ -1,6 +1,7 @@
-import { HexPattern } from "@hextools/renderer/staffGrid";
 import { ActionIcon, Group, Text } from "@mantine/core";
 import { IconCopy, IconX } from "@tabler/icons-react";
+
+import { HexPattern } from "@hextools/renderer/staffGrid";
 
 export interface StaffGridSidebarPatternProps {
   pattern: HexPattern;

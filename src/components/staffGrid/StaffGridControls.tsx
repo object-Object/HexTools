@@ -1,9 +1,4 @@
 import {
-  HexCoord,
-  type GuiSpellcastingSettings,
-  type ResolvedPattern,
-} from "@hextools/renderer/staffGrid";
-import {
   ActionIcon,
   Button,
   Drawer,
@@ -25,6 +20,12 @@ import {
   IconTrash,
 } from "@tabler/icons-react";
 import { useState } from "react";
+
+import {
+  HexCoord,
+  type GuiSpellcastingSettings,
+  type ResolvedPattern,
+} from "@hextools/renderer/staffGrid";
 
 import { staffGridButtonProps } from "./StaffGrid.lib";
 import StaffGridSettings from "./StaffGridSettings";
