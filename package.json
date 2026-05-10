@@ -16,7 +16,6 @@
     "lint": "run-p 'lint:*'",
     "lint:eslint": "eslint .",
     "lint:prettier": "prettier . --check",
-    "prepare": "build-packages",
     "preview": "vite preview",
     "storybook": "storybook dev -p 6006",
     "storybook-webgl": "cross-env ENABLE_WEBGL_INSPECTOR=1 yarn storybook"

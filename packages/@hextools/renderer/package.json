@@ -23,6 +23,9 @@
   "main": "./dist/index.cjs",
   "module": "./dist/index.js",
   "types": "./src/index.ts",
+  "scripts": {
+    "prepare": "vite build"
+  },
   "dependencies": {
     "bytebuffer": "^5.0.1",
     "gl-matrix": "^4.0.0-beta.2",
