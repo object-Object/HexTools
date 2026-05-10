@@ -736,6 +736,7 @@ __metadata:
     "@dnd-kit/helpers": "npm:^0.4.0"
     "@dnd-kit/react": "npm:^0.4.0"
     "@eslint/js": "npm:^9.39.1"
+    "@hextools/react": "workspace:^"
     "@hextools/renderer": "workspace:^"
     "@mantine/core": "npm:^9.1.0"
     "@mantine/hooks": "npm:^9.1.0"
@@ -778,6 +779,25 @@ __metadata:
       unplugged: true
     prettier-plugin-packagejson@3.0.0:
       unplugged: true
+  languageName: unknown
+  linkType: soft
+
+"@hextools/react@workspace:^, @hextools/react@workspace:packages/@hextools/react":
+  version: 0.0.0-use.local
+  resolution: "@hextools/react@workspace:packages/@hextools/react"
+  dependencies:
+    "@hextools/renderer": "workspace:^"
+    "@mantine/core": "npm:^9.1.0"
+    "@mantine/hooks": "npm:^9.1.0"
+    "@tabler/icons-react": "npm:^3.36.1"
+    "@types/lodash": "npm:^4.17.24"
+    "@types/react": "npm:^19.2.7"
+    "@types/react-dom": "npm:^19.2.3"
+    gl-matrix: "npm:^4.0.0-beta.2"
+    lodash: "npm:^4.18.1"
+    react: "npm:^19.2.0"
+    react-dom: "npm:^19.2.0"
+    vite: "npm:^8.0.0-beta.13"
   languageName: unknown
   linkType: soft
 

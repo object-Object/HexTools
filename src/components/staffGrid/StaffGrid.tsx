@@ -1,16 +1,17 @@
-import {
-  GuiSpellcasting,
-  type GuiSpellcastingSettings,
-  type ResolvedPattern,
-} from "@hextools/renderer/staffGrid";
 import { Box } from "@mantine/core";
 import { useHotkeys, useStateHistory } from "@mantine/hooks";
 import _ from "lodash";
 import React, { useEffect, useEffectEvent, useRef } from "react";
 
-import { useDeviceMotion } from "../../hooks/useDeviceMotion";
-import { useIsTouchscreen } from "../../hooks/useIsTouchscreen";
-import { useLocalStorageObject } from "../../hooks/useLocalStorageObject";
+import { useDeviceMotion } from "@hextools/react";
+import { useIsTouchscreen } from "@hextools/react";
+import { useLocalStorageObject } from "@hextools/react";
+import {
+  GuiSpellcasting,
+  type GuiSpellcastingSettings,
+  type ResolvedPattern,
+} from "@hextools/renderer/staffGrid";
+
 import StaffGridControls from "./StaffGridControls";
 
 export default function StaffGrid() {

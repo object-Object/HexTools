@@ -5,16 +5,9 @@ import { defineConfig } from "vite";
 export default defineConfig({
   build: {
     lib: {
-      entry: Object.fromEntries(
-        [
-          ["index", "index.ts"],
-          ["shaders", "shaders/index.ts"],
-          ["staffGrid", "staffGrid/index.ts"],
-        ].map(([name, path]) => [
-          name,
-          resolve(import.meta.dirname, "src", path),
-        ]),
-      ),
+      entry: {
+        index: resolve(import.meta.dirname, "src/index.ts"),
+      },
       formats: ["es", "cjs"],
     },
     rolldownOptions: {

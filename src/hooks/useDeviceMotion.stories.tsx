@@ -4,7 +4,7 @@ import type { Meta, StoryObj } from "@storybook/react-vite";
 import {
   useDeviceMotion,
   useRequestDeviceMotionPermission,
-} from "./useDeviceMotion";
+} from "@hextools/react";
 
 function UseDeviceMotionTestScreen() {
   const { acceleration, isShaking } = useDeviceMotion({

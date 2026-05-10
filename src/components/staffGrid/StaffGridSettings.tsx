@@ -1,5 +1,3 @@
-import { mod } from "@hextools/renderer";
-import type { GuiSpellcastingSettings } from "@hextools/renderer/staffGrid";
 import {
   Accordion,
   ActionIcon,
@@ -13,9 +11,12 @@ import {
 import { useDisclosure, useMediaQuery } from "@mantine/hooks";
 import { IconChevronRight, IconSettings } from "@tabler/icons-react";
 
-import { useRequestDeviceMotionPermission } from "../../hooks/useDeviceMotion";
+import { ControlledNumberInput } from "@hextools/react";
+import { useRequestDeviceMotionPermission } from "@hextools/react";
+import { mod } from "@hextools/renderer";
+import type { GuiSpellcastingSettings } from "@hextools/renderer/staffGrid";
+
 import type { KeysOfValue } from "../../utils/types";
-import ControlledNumberInput from "../ControlledNumberInput";
 import { staffGridButtonProps } from "./StaffGrid.lib";
 import styles from "./StaffGridSettings.module.css";
 

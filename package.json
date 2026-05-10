@@ -9,6 +9,7 @@
   "scripts": {
     "build": "tsc -b && vite build",
     "build-packages": "run-p 'build-packages:*'",
+    "build-packages:react": "vite build packages/@hextools/react",
     "build-packages:renderer": "vite build packages/@hextools/renderer",
     "build-storybook": "storybook build",
     "dev": "vite",
@@ -26,6 +27,7 @@
     "@dnd-kit/dom": "^0.4.0",
     "@dnd-kit/helpers": "^0.4.0",
     "@dnd-kit/react": "^0.4.0",
+    "@hextools/react": "workspace:^",
     "@hextools/renderer": "workspace:^",
     "@mantine/core": "^9.1.0",
     "@mantine/hooks": "^9.1.0",

@@ -11,7 +11,8 @@ import { useDisclosure } from "@mantine/hooks";
 import { IconBrandGithub } from "@tabler/icons-react";
 import { Redirect, Route, Switch } from "wouter";
 
-import ColorSchemeButton from "./components/ColorSchemeButton";
+import { ColorSchemeButton } from "@hextools/react";
+
 import HeaderNavLink from "./components/HeaderNavLink";
 import StaffGrid from "./components/staffGrid/StaffGrid";
 import SwindlerStacks from "./components/swindler/SwindlerStacks";
