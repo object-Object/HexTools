@@ -24,7 +24,7 @@
   "module": "./dist/index.js",
   "types": "./src/index.ts",
   "scripts": {
-    "prepare": "vite build"
+    "prepack": "vite build"
   },
   "dependencies": {
     "bytebuffer": "^5.0.1",
