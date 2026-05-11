@@ -9,7 +9,7 @@ export interface ControlledNumberInputProps extends Omit<
   onChange: (value: number) => unknown;
 }
 
-export default function ControlledNumberInput({
+export function ControlledNumberInput({
   value,
   onChange,
   ...restProps

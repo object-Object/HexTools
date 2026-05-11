@@ -10,7 +10,7 @@ export interface ColorSchemeButtonProps extends Omit<
   "onClick"
 > {}
 
-export default function ColorSchemeButton(props: ColorSchemeButtonProps) {
+export function ColorSchemeButton(props: ColorSchemeButtonProps) {
   const { colorScheme, toggleColorScheme } = useMantineColorScheme();
 
   return (

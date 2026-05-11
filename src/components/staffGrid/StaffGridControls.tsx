@@ -1,12 +1,4 @@
-import {
-  ActionIcon,
-  Button,
-  Drawer,
-  Group,
-  Popover,
-  Stack,
-  Text,
-} from "@mantine/core";
+import { ActionIcon, Stack } from "@mantine/core";
 import {
   useDisclosure,
   type UseStateHistoryHandlers,
@@ -16,20 +8,17 @@ import {
   IconArrowBackUp,
   IconArrowForwardUp,
   IconMenu2,
-  IconShare2,
   IconTrash,
 } from "@tabler/icons-react";
-import { useState } from "react";
 
+import { StaffGridSidebar } from "@hextools/react";
 import {
-  HexCoord,
   type GuiSpellcastingSettings,
   type ResolvedPattern,
 } from "@hextools/renderer/staffGrid";
 
 import { staffGridButtonProps } from "./StaffGrid.lib";
 import StaffGridSettings from "./StaffGridSettings";
-import StaffGridSidebarPattern from "./StaffGridSidebarPattern";
 
 export interface StaffGridControlsProps {
   patterns: ResolvedPattern[];
@@ -50,13 +39,6 @@ export default function StaffGridControls({
 }: StaffGridControlsProps) {
   const [sidebarOpen, { toggle: toggleSidebar, close: closeSidebar }] =
     useDisclosure(false);
-
-  const [popoverOpen, setPopoverOpen] = useState(false);
-
-  const copyAndClosePopover = (text: string) => {
-    void navigator.clipboard.writeText(text);
-    setPopoverOpen(false);
-  };
 
   return (
     <>
@@ -98,71 +80,12 @@ export default function StaffGridControls({
         </ActionIcon>
       </Stack>
 
-      <Drawer
-        title={
-          <Group gap="md">
-            <Text fw="bold">Patterns</Text>
-            {patterns.length > 0 && (
-              <Popover opened={popoverOpen} onChange={setPopoverOpen}>
-                <Popover.Target>
-                  <ActionIcon
-                    variant="transparent"
-                    size="sm"
-                    onClick={() => setPopoverOpen((open) => !open)}
-                  >
-                    <IconShare2 />
-                  </ActionIcon>
-                </Popover.Target>
-
-                <Popover.Dropdown>
-                  <Stack gap="sm">
-                    <Button
-                      variant="default"
-                      onClick={() =>
-                        copyAndClosePopover(
-                          patterns
-                            .map(({ pattern }) => pattern.toString())
-                            .join("\n"),
-                        )
-                      }
-                    >
-                      Copy angle signatures
-                    </Button>
-
-                    <Button
-                      variant="default"
-                      onClick={() =>
-                        copyAndClosePopover(
-                          `/patterns hex hex:${patterns.map(({ pattern }) => pattern.toShorthand()).join(",")}`,
-                        )
-                      }
-                    >
-                      Copy HexBug command
-                    </Button>
-                  </Stack>
-                </Popover.Dropdown>
-              </Popover>
-            )}
-          </Group>
-        }
-        position="right"
+      <StaffGridSidebar
+        patterns={patterns}
+        onPatternsChange={patternsHandlers.set}
         opened={sidebarOpen}
         onClose={closeSidebar}
-      >
-        <Stack gap="xs">
-          {patterns.map(({ pattern, origin }, index) => (
-            <StaffGridSidebarPattern
-              key={HexCoord.toString(origin)}
-              pattern={pattern}
-              onDelete={() => {
-                patternsHandlers.set(
-                  patterns.filter((_resolved, i) => i !== index),
-                );
-              }}
-            />
-          ))}
-        </Stack>
-      </Drawer>
+      />
     </>
   );
 }

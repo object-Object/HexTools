@@ -8,7 +8,7 @@ export interface StaffGridSidebarPatternProps {
   onDelete: () => unknown;
 }
 
-export default function StaffGridSidebarPattern({
+export function StaffGridSidebarPattern({
   pattern,
   onDelete,
 }: StaffGridSidebarPatternProps) {

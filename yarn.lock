@@ -786,6 +786,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@hextools/react@workspace:packages/@hextools/react"
   dependencies:
+    "@hextools/renderer": "workspace:^"
     "@mantine/core": "npm:^9.1.0"
     "@mantine/hooks": "npm:^9.1.0"
     "@tabler/icons-react": "npm:^3.36.1"

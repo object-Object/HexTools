@@ -14,7 +14,7 @@ import { Redirect, Route, Switch } from "wouter";
 import { ColorSchemeButton } from "@hextools/react";
 
 import HeaderNavLink from "./components/HeaderNavLink";
-import StaffGrid from "./components/staffGrid/StaffGrid";
+import StaffGridPage from "./components/staffGrid/StaffGridPage";
 import SwindlerStacks from "./components/swindler/SwindlerStacks";
 
 export default function App() {
@@ -91,5 +91,5 @@ export default function App() {
 
 const routes = [
   { path: "/Swindler", label: "Swindler", component: SwindlerStacks },
-  { path: "/StaffGrid", label: "Staff Grid", component: StaffGrid },
+  { path: "/StaffGrid", label: "Staff Grid", component: StaffGridPage },
 ];

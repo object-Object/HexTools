@@ -1,36 +1,35 @@
 import { Box } from "@mantine/core";
-import { useHotkeys, useStateHistory } from "@mantine/hooks";
-import _ from "lodash";
-import React, { useEffect, useEffectEvent, useRef } from "react";
+import React, {
+  useEffect,
+  useEffectEvent,
+  useImperativeHandle,
+  useRef,
+} from "react";
 
-import { useDeviceMotion } from "@hextools/react";
-import { useIsTouchscreen } from "@hextools/react";
-import { useLocalStorageObject } from "@hextools/react";
 import {
   GuiSpellcasting,
   type GuiSpellcastingSettings,
   type ResolvedPattern,
 } from "@hextools/renderer/staffGrid";
 
-import StaffGridControls from "./StaffGridControls";
+export interface StaffGridProps {
+  patterns: ResolvedPattern[];
+  onPatternsChange: (patterns: ResolvedPattern[]) => unknown;
+  settings: GuiSpellcastingSettings;
+  ref?: React.Ref<StaffGridRef>;
+}
 
-export default function StaffGrid() {
-  const isTouchscreen = useIsTouchscreen();
+export interface StaffGridRef {
+  cancelPattern: () => void;
+  setZappyMultiplier: (value: number) => void;
+}
 
-  const [patterns, patternsHandlers, patternsHistory] = useStateHistory<
-    ResolvedPattern[]
-  >([]);
-
-  const defaultSettings = GuiSpellcasting.getDefaultSettings({
-    isTouchscreen,
-  });
-
-  const [settings, setSettings] =
-    useLocalStorageObject<GuiSpellcastingSettings>({
-      key: "staff-grid-settings",
-      defaultValue: defaultSettings,
-    });
-
+export function StaffGrid({
+  patterns,
+  onPatternsChange,
+  settings,
+  ref,
+}: StaffGridProps) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const guiRef = useRef<GuiSpellcasting>(null);
   const mouseXRef = useRef(0);
@@ -38,34 +37,18 @@ export default function StaffGrid() {
   const isCtrlDownRef = useRef(false);
   const zappyMultiplierRef = useRef(1);
 
-  useHotkeys([
-    ["Escape", () => guiRef.current?.mouseCanceled()],
-    ["mod+Z", () => patternsHandlers.back()],
-    ["mod+Y", () => patternsHandlers.forward()],
-    ["mod+shift+Z", () => patternsHandlers.forward()],
-  ]);
-
-  useDeviceMotion({
-    shakeDuration: 1500,
-    shakeThreshold: 15,
-    onMeanAcceleration: (meanAcceleration) => {
-      zappyMultiplierRef.current = settings.zappyOnShake
-        ? _.clamp(meanAcceleration / 5, 1, 3)
-        : 1;
-    },
-    onShake: () => {
-      switch (settings.shakeAction) {
-        case "none":
-          break;
-        case "undo":
-          patternsHandlers.back();
-          break;
-        case "clear":
-          patternsHandlers.set([]);
-          break;
-      }
-    },
-  });
+  useImperativeHandle(
+    ref,
+    () => ({
+      cancelPattern: () => {
+        guiRef.current?.mouseCanceled();
+      },
+      setZappyMultiplier: (value) => {
+        zappyMultiplierRef.current = value;
+      },
+    }),
+    [],
+  );
 
   const updateMouseRefs = (event: React.PointerEvent) => {
     if (!canvasRef.current || !event.isPrimary) return false;
@@ -137,7 +120,7 @@ export default function StaffGrid() {
       gl,
       settings,
       patterns,
-      onPatternsChange: patternsHandlers.set,
+      onPatternsChange,
     });
     guiRef.current = gui;
 
@@ -174,50 +157,42 @@ export default function StaffGrid() {
     };
   }, []);
 
-  // settings isn't loaded from the session store when useOnMount runs
-  // so we need to update it in a useEffect instead of just the setter
   useEffect(() => {
     if (guiRef.current) {
       guiRef.current.settings = settings;
+      guiRef.current.onPatternsChange = onPatternsChange;
     }
-  }, [settings]);
+  }, [settings, onPatternsChange]);
 
   useEffect(() => {
     guiRef.current?.setPatterns(patterns, false);
   }, [patterns]);
 
   return (
-    <>
-      <Box
-        pos="absolute"
-        inset="0"
+    <Box
+      pos="absolute"
+      inset="0"
+      style={{
+        overflow: "hidden",
+        // Prevent iOS select on press and hold
+        // https://stackoverflow.com/a/78378759
+        userSelect: "none",
+        WebkitUserSelect: "none",
+      }}
+    >
+      <canvas
+        ref={canvasRef}
+        onPointerDown={handlePointerDown}
+        onPointerMove={handlePointerMove}
+        onPointerUp={handlePointerUp}
+        onPointerCancel={handlePointerCancel}
         style={{
-          overflow: "hidden",
-          // Prevent iOS select on press and hold
-          // https://stackoverflow.com/a/78378759
-          userSelect: "none",
-          WebkitUserSelect: "none",
+          width: "100%",
+          height: "100%",
+          touchAction: "pinch-zoom",
         }}
-      >
-        <canvas
-          ref={canvasRef}
-          onPointerDown={handlePointerDown}
-          onPointerMove={handlePointerMove}
-          onPointerUp={handlePointerUp}
-          onPointerCancel={handlePointerCancel}
-          style={{ width: "100%", height: "100%", touchAction: "pinch-zoom" }}
-        />
-      </Box>
-
-      <StaffGridControls
-        patterns={patterns}
-        patternsHandlers={patternsHandlers}
-        patternsHistory={patternsHistory}
-        settings={settings}
-        onSettingsChange={setSettings}
-        onResetSettings={() => setSettings(defaultSettings)}
       />
-    </>
+    </Box>
   );
 }
 

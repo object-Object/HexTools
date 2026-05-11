@@ -1,13 +1,13 @@
 import type { Meta, StoryObj } from "@storybook/react-vite";
 
-import StaffGrid from "./StaffGrid";
+import StaffGridPage from "./StaffGridPage";
 
 const meta = {
-  component: StaffGrid,
+  component: StaffGridPage,
   args: {
     guiScale: 1,
   },
-} satisfies Meta<typeof StaffGrid>;
+} satisfies Meta<typeof StaffGridPage>;
 export default meta;
 
 type Story = StoryObj<typeof meta>;
