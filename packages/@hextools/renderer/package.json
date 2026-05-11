@@ -11,13 +11,13 @@
     },
     "./shaders": {
       "types": "./src/shaders/index.ts",
-      "require": "./dist/shaders/index.cjs",
-      "import": "./dist/shaders/index.js"
+      "require": "./dist/shaders.cjs",
+      "import": "./dist/shaders.js"
     },
     "./staffGrid": {
       "types": "./src/staffGrid/index.ts",
-      "require": "./dist/staffGrid/index.cjs",
-      "import": "./dist/staffGrid/index.js"
+      "require": "./dist/staffGrid.cjs",
+      "import": "./dist/staffGrid.js"
     }
   },
   "main": "./dist/index.cjs",
