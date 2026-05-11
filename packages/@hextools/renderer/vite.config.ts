@@ -20,7 +20,7 @@ export default defineConfig({
     rolldownOptions: {
       // All bare module IDs (not starting with `.` or `/` or `C:\`)
       // https://rolldown.rs/reference/InputOptions.external
-      external: /^(?![a-zA-Z]:[/\\]|@hextools\/)[^./]/,
+      external: /^(?![a-zA-Z]:[/\\])[^./]/,
     },
   },
 });
