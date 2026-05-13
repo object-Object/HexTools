@@ -31,6 +31,7 @@ export default defineConfig([
           allowInterfaces: "with-single-extends",
         },
       ],
+      "@typescript-eslint/no-namespace": "off",
       "@typescript-eslint/no-unused-vars": [
         "warn",
         {

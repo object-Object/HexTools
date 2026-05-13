@@ -4,7 +4,6 @@ import _ from "lodash";
 import { useEffect, useRef, useState } from "react";
 
 // https://github.com/microsoft/TypeScript/issues/2957#issuecomment-749213455
-// eslint-disable-next-line @typescript-eslint/no-namespace
 declare namespace DeviceMotionEvent {
   /** https://developer.mozilla.org/en-US/docs/Web/API/DeviceMotionEvent/requestPermission_static */
   export const requestPermission:

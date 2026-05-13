@@ -1,6 +1,7 @@
 import { Vec2, type Vec2Like } from "gl-matrix";
 
 import { BufferBuilder } from "../buffer";
+import { RGBAColor, type RGBColor } from "../colors";
 import { clamp, lerp, mod } from "../math";
 import {
   enablePositionColorShader,
@@ -15,6 +16,7 @@ import {
   findDupIndices,
   type DrawPatternFromPointsOptions,
 } from "./renderLib";
+import type { ResolvedPattern, ResolvedPatternType } from "./resolvedPattern";
 
 export interface GuiSpellcastingSettings {
   guiScale: number;
@@ -33,6 +35,7 @@ export interface GuiSpellcastingSettings {
 export class GuiSpellcasting {
   gl: WebGL2RenderingContext;
   settings: GuiSpellcastingSettings;
+  patternType: ResolvedPatternType;
   onPatternsChange?: (resolvedPatterns: ResolvedPattern[]) => unknown;
 
   private shader: PositionColorShader;
@@ -45,13 +48,18 @@ export class GuiSpellcasting {
   constructor({
     gl,
     settings,
+    patternType,
     onPatternsChange,
     patterns,
-  }: Pick<GuiSpellcasting, "gl" | "settings" | "onPatternsChange"> & {
+  }: Pick<
+    GuiSpellcasting,
+    "gl" | "settings" | "patternType" | "onPatternsChange"
+  > & {
     patterns: ResolvedPattern[];
   }) {
     this.gl = gl;
     this.settings = settings;
+    this.patternType = patternType;
     this.onPatternsChange = onPatternsChange;
     this.setPatterns(patterns, false);
 
@@ -226,7 +234,11 @@ export class GuiSpellcasting {
       case "drawing": {
         const { start, wipPattern } = this.drawState;
         this.drawState = BETWEEN_PATTERNS;
-        this.addPattern({ pattern: wipPattern, origin: start });
+        this.addPattern({
+          pattern: wipPattern,
+          origin: start,
+          type: this.patternType,
+        });
         break;
       }
     }
@@ -284,9 +296,9 @@ export class GuiSpellcasting {
               mat: null,
               point: dotPx,
               radius: scaledDist * 2,
-              r: lerp(scaledDist, 0.4, 0.5),
-              g: lerp(scaledDist, 0.8, 1),
-              b: lerp(scaledDist, 0.7, 0.9),
+              r: lerp(scaledDist, MIN_DOT_COLOR.r, DOT_COLOR.r),
+              g: lerp(scaledDist, MIN_DOT_COLOR.g, DOT_COLOR.g),
+              b: lerp(scaledDist, MIN_DOT_COLOR.b, DOT_COLOR.b),
               a: scaledDist,
             });
           }
@@ -306,9 +318,7 @@ export class GuiSpellcasting {
               mat: null,
               point: dotPx,
               radius: 1.25,
-              r: 0.5,
-              g: 1,
-              b: 0.9,
+              ...DOT_COLOR,
               a: 1,
             });
             coord.q++;
@@ -336,14 +346,14 @@ export class GuiSpellcasting {
       isCtrlDown: isCtrlDown !== settings.ctrlTogglesOffStrokeOrder,
     } satisfies Partial<DrawPatternFromPointsOptions>;
 
-    for (const [i, { pattern, origin }] of this.patterns.entries()) {
+    for (const [i, { pattern, origin, type }] of this.patterns.entries()) {
       drawPatternFromPoints({
         points: [...pattern.toLines(this.hexSize, this.coordToPx(origin))],
         dupIndices: findDupIndices(pattern.positions()),
         drawLast: true,
-        tail: [115 / 255, 133 / 255, 222 / 255, 1],
-        head: [254 / 255, 203 / 255, 230 / 255, 1],
-        flowIrregular: 0.2 * zappyMultiplier,
+        tail: { ...type.color, a: RESOLVED_PATTERN_ALPHA },
+        head: { ...type.fadeColor, a: RESOLVED_PATTERN_ALPHA },
+        flowIrregular: (type.success ? 0.2 : 0.9) * zappyMultiplier,
         seed: i,
         ...commonPatternOptions,
       });
@@ -368,8 +378,8 @@ export class GuiSpellcasting {
         points,
         dupIndices,
         drawLast: false,
-        tail: [100 / 255, 200 / 255, 1, 1],
-        head: [254 / 255, 203 / 255, 230 / 255, 1],
+        tail: WIP_PATTERN_TAIL,
+        head: WIP_PATTERN_HEAD,
         flowIrregular: 0.1 * zappyMultiplier,
         seed: this.patterns.length,
         ...commonPatternOptions,
@@ -414,11 +424,6 @@ export class GuiSpellcasting {
   }
 }
 
-export interface ResolvedPattern {
-  pattern: HexPattern;
-  origin: HexCoord;
-}
-
 interface MousePos {
   mouseX: number;
   mouseY: number;
@@ -445,3 +450,20 @@ interface Drawing {
 const BETWEEN_PATTERNS: BetweenPatterns = { type: "betweenPatterns" };
 
 const GRID_SNAP_THRESHOLD = 0.5;
+
+const DOT_COLOR: RGBColor = {
+  r: 0.5,
+  g: 1,
+  b: 0.9,
+};
+
+const MIN_DOT_COLOR: RGBColor = {
+  r: DOT_COLOR.r - 0.1,
+  g: DOT_COLOR.g - 0.2,
+  b: DOT_COLOR.b - 0.2,
+};
+
+const RESOLVED_PATTERN_ALPHA = 0xc8 / 0xff;
+
+const WIP_PATTERN_TAIL = RGBAColor.fromRGB(0x64c8ff);
+const WIP_PATTERN_HEAD = RGBAColor.fromRGB(0xfecbe6);

@@ -12,27 +12,28 @@ import {
 } from "@tabler/icons-react";
 
 import { StaffGridSidebar } from "@hextools/react";
-import {
-  type GuiSpellcastingSettings,
-  type ResolvedPattern,
-} from "@hextools/renderer/staffGrid";
+import { type ResolvedPattern } from "@hextools/renderer/staffGrid";
 
 import { staffGridButtonProps } from "./StaffGrid.lib";
-import StaffGridSettings from "./StaffGridSettings";
+import type { StaffGridPaletteProps } from "./StaffGridPalette";
+import StaffGridPalette from "./StaffGridPalette";
+import StaffGridSettings, {
+  type StaffGridSettingsProps,
+} from "./StaffGridSettings";
 
-export interface StaffGridControlsProps {
+export interface StaffGridControlsProps
+  extends StaffGridPaletteProps, StaffGridSettingsProps {
   patterns: ResolvedPattern[];
   patternsHandlers: UseStateHistoryHandlers<ResolvedPattern[]>;
   patternsHistory: UseStateHistoryValue<ResolvedPattern[]>;
-  settings: GuiSpellcastingSettings;
-  onSettingsChange: (settings: GuiSpellcastingSettings) => unknown;
-  onResetSettings: () => unknown;
 }
 
 export default function StaffGridControls({
   patterns,
   patternsHandlers,
   patternsHistory,
+  patternType,
+  onPatternTypeChange,
   settings,
   onSettingsChange,
   onResetSettings,
@@ -52,6 +53,11 @@ export default function StaffGridControls({
         <ActionIcon {...staffGridButtonProps} onClick={toggleSidebar}>
           <IconMenu2 />
         </ActionIcon>
+
+        <StaffGridPalette
+          patternType={patternType}
+          onPatternTypeChange={onPatternTypeChange}
+        />
 
         <ActionIcon
           {...staffGridButtonProps}

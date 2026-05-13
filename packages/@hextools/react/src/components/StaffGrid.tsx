@@ -10,11 +10,13 @@ import {
   GuiSpellcasting,
   type GuiSpellcastingSettings,
   type ResolvedPattern,
+  type ResolvedPatternType,
 } from "@hextools/renderer/staffGrid";
 
 export interface StaffGridProps {
   patterns: ResolvedPattern[];
   onPatternsChange: (patterns: ResolvedPattern[]) => unknown;
+  patternType: ResolvedPatternType;
   settings: GuiSpellcastingSettings;
   ref?: React.Ref<StaffGridRef>;
 }
@@ -27,6 +29,7 @@ export interface StaffGridRef {
 export function StaffGrid({
   patterns,
   onPatternsChange,
+  patternType,
   settings,
   ref,
 }: StaffGridProps) {
@@ -120,6 +123,7 @@ export function StaffGrid({
       gl,
       settings,
       patterns,
+      patternType,
       onPatternsChange,
     });
     guiRef.current = gui;
@@ -161,8 +165,9 @@ export function StaffGrid({
     if (guiRef.current) {
       guiRef.current.settings = settings;
       guiRef.current.onPatternsChange = onPatternsChange;
+      guiRef.current.patternType = patternType;
     }
-  }, [settings, onPatternsChange]);
+  }, [settings, onPatternsChange, patternType]);
 
   useEffect(() => {
     guiRef.current?.setPatterns(patterns, false);

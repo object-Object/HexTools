@@ -1,13 +1,8 @@
-import {
-  Vec2,
-  type Mat4Like,
-  type Vec2Like,
-  type Vec3Like,
-  type Vec4Like,
-} from "gl-matrix";
+import { Vec2, type Mat4Like, type Vec2Like, type Vec3Like } from "gl-matrix";
 import { createNoise3D } from "simplex-noise";
 
 import type { BufferBuilder } from "../buffer";
+import type { RGBAColor, RGBColor } from "../colors";
 import { clamp, lerp } from "../math";
 import { HexCoord } from "./hexMath";
 
@@ -28,14 +23,14 @@ export function drawLineSeq({
   points: Vec2Like[];
   width: number;
   z: number;
-  tail: Vec4Like;
-  head: Vec4Like;
+  tail: RGBAColor;
+  head: RGBColor;
   isCtrlDown: boolean;
 }) {
   if (points.length <= 1) return;
 
-  const [r1, g1, b1, a] = tail;
-  const [r2, g2, b2] = isCtrlDown ? head : tail;
+  const { r: r1, g: g1, b: b1, a } = tail;
+  const { r: r2, g: g2, b: b2 } = isCtrlDown ? head : tail;
 
   const n = points.length;
   const joinAngles = new Float32Array(n);
@@ -181,8 +176,8 @@ export interface DrawPatternFromPointsOptions extends MakeZappyOptions {
   buf: BufferBuilder;
   mat: Mat4Like | null;
   drawLast: boolean;
-  tail: Vec4Like;
-  head: Vec4Like;
+  tail: RGBAColor;
+  head: RGBAColor;
   isCtrlDown: boolean;
 }
 
@@ -226,10 +221,10 @@ export function drawPatternFromPoints({
       mat,
       point: node,
       radius: 2,
-      r: dodge(head[0]),
-      g: dodge(head[1]),
-      b: dodge(head[2]),
-      a: head[3],
+      r: dodge(head.r),
+      g: dodge(head.g),
+      b: dodge(head.b),
+      a: head.a,
     });
   }
 }
@@ -381,15 +376,11 @@ export function findDupIndices(pts: Iterable<HexCoord>): Set<number> {
   return found;
 }
 
-export interface DrawSpotOptions {
+export interface DrawSpotOptions extends RGBAColor {
   buf: BufferBuilder;
   mat: Mat4Like | null;
   point: Vec2Like;
   radius: number;
-  r: number;
-  g: number;
-  b: number;
-  a: number;
 }
 
 export function drawSpot({
@@ -417,9 +408,9 @@ export function drawSpot({
   buf.end();
 }
 
-function screenCol(col: Vec4Like): Vec4Like {
-  const [r, g, b, a] = col;
-  return [screen(r), screen(g), screen(b), a];
+function screenCol(col: RGBAColor): RGBAColor {
+  const { r, g, b, a } = col;
+  return { r: screen(r), g: screen(g), b: screen(b), a };
 }
 
 function screen(n: number) {

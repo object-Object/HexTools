@@ -9,6 +9,11 @@ import {
 } from "@hextools/renderer/shaders";
 import { drawLineSeq, drawSpot } from "@hextools/renderer/staffGrid";
 
+import {
+  RGBAColor,
+  RGBColor,
+} from "../../../packages/@hextools/renderer/src/colors";
+
 function RenderLibStory() {
   const ref = useRef<HTMLCanvasElement>(null);
 
@@ -58,8 +63,8 @@ function RenderLibStory() {
       ],
       width: 8,
       z: 1,
-      tail: [0, 1, 0, 1],
-      head: [0, 0, 1, 1],
+      tail: RGBAColor.fromRGB(0x00ff00),
+      head: RGBColor.fromRGB(0x0000ff),
       isCtrlDown: true,
     });
   }, []);

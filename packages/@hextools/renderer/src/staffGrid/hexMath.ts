@@ -63,7 +63,6 @@ export enum HexDir {
   NORTH_WEST,
 }
 
-// eslint-disable-next-line @typescript-eslint/no-namespace
 export namespace HexDir {
   export function asDelta(dir: HexDir) {
     return dirToDelta[dir];

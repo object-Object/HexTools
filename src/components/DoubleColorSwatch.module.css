@@ -1,0 +1,10 @@
+.left,
+.right {
+  grid-column: 1;
+  grid-row: 1;
+}
+
+.left {
+  clip-path: polygon(0 0, 0% 100%, 100% 0);
+  z-index: 1;
+}

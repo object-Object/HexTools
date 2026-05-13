@@ -1,11 +1,12 @@
 import { useHotkeys, useStateHistory } from "@mantine/hooks";
 import _ from "lodash";
-import { useRef } from "react";
+import { useRef, useState } from "react";
 
 import { StaffGrid, type StaffGridRef, useDeviceMotion } from "@hextools/react";
 import { useIsTouchscreen } from "@hextools/react";
 import { useLocalStorageObject } from "@hextools/react";
 import {
+  DEFAULT_PATTERN_TYPE,
   GuiSpellcasting,
   type GuiSpellcastingSettings,
   type ResolvedPattern,
@@ -19,6 +20,8 @@ export default function StaffGridPage() {
   const [patterns, patternsHandlers, patternsHistory] = useStateHistory<
     ResolvedPattern[]
   >([]);
+
+  const [patternType, setPatternType] = useState(DEFAULT_PATTERN_TYPE);
 
   const staffGridRef = useRef<StaffGridRef>(null);
 
@@ -66,6 +69,7 @@ export default function StaffGridPage() {
       <StaffGrid
         patterns={patterns}
         onPatternsChange={patternsHandlers.set}
+        patternType={patternType}
         settings={settings}
         ref={staffGridRef}
       />
@@ -74,6 +78,8 @@ export default function StaffGridPage() {
         patterns={patterns}
         patternsHandlers={patternsHandlers}
         patternsHistory={patternsHistory}
+        patternType={patternType}
+        onPatternTypeChange={setPatternType}
         settings={settings}
         onSettingsChange={setSettings}
         onResetSettings={() => setSettings(defaultSettings)}
