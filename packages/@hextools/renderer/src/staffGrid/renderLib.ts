@@ -1,6 +1,5 @@
 import {
   Vec2,
-  Vec3,
   type Mat4Like,
   type Vec2Like,
   type Vec3Like,
@@ -73,14 +72,10 @@ export function drawLineSeq({
       .sub(p1)
       .normalize()
       .scale(width * 0.5);
-    const normal = new Vec2(-tangent.y, tangent.x);
+    const normal: Vec2Like = [-tangent.y, tangent.x];
 
-    function color(time: number) {
-      return new Vec3(
-        lerp(time, r1, r2),
-        lerp(time, g1, g2),
-        lerp(time, b1, b2),
-      );
+    function color(time: number): Vec3Like {
+      return [lerp(time, r1, r2), lerp(time, g1, g2), lerp(time, b1, b2)];
     }
 
     const color1 = color(i / n);
@@ -127,10 +122,10 @@ export function drawLineSeq({
       }
 
       if (sangle < 0) {
-        let prevVert = new Vec2(p1[0] - rnormal.x, p1[1] - rnormal.y);
+        let prevVert: Vec2Like = [p1[0] - rnormal.x, p1[1] - rnormal.y];
         for (let j = 1; j <= joinSteps; j++) {
           const fan = rotate(rnormal, -sangle * (j / joinSteps));
-          const fanShift = new Vec2(p1[0] - fan.x, p1[1] - fan.y);
+          const fanShift: Vec2Like = [p1[0] - fan[0], p1[1] - fan[1]];
 
           vertex(color1, p1);
           vertex(color1, prevVert);
@@ -139,10 +134,10 @@ export function drawLineSeq({
         }
       } else {
         const startFan = rotate(normal, -sangle);
-        let prevVert = new Vec2(p1[0] - startFan.x, p1[1] - startFan.y);
+        let prevVert: Vec2Like = [p1[0] - startFan[0], p1[1] - startFan[1]];
         for (let j = joinSteps - 1; j >= 0; j--) {
           const fan = rotate(normal, -sangle * (j / joinSteps));
-          const fanShift = new Vec2(p1[0] - fan.x, p1[1] - fan.y);
+          const fanShift: Vec2Like = [p1[0] - fan[0], p1[1] - fan[1]];
 
           vertex(color1, p1);
           vertex(color1, prevVert);
@@ -159,7 +154,7 @@ export function drawLineSeq({
       .sub(prev)
       .normalize()
       .scale(0.5 * width);
-    const normal = new Vec2(-tangent.y, tangent.x);
+    const normal: Vec2Like = [-tangent.y, tangent.x];
     const joinSteps = Math.ceil(180 / CAP_THETA);
     buf.begin(buf.gl.TRIANGLE_FAN);
     vertex(color, point);
@@ -171,14 +166,15 @@ export function drawLineSeq({
     }
     buf.end();
   }
-  drawCaps(new Vec3(r1, g1, b1), points[0], points[1]);
-  drawCaps(new Vec3(r2, g2, b2), points[n - 1], points[n - 2]);
+  drawCaps([r1, g1, b1], points[0], points[1]);
+  drawCaps([r2, g2, b2], points[n - 1], points[n - 2]);
 }
 
-function rotate(vec: Vec2, theta: number): Vec2 {
+function rotate(vec: Vec2Like, theta: number): Vec2Like {
+  const [x, y] = vec;
   const cos = Math.cos(theta);
   const sin = Math.sin(theta);
-  return new Vec2(vec.x * cos - vec.y * sin, vec.y * cos + vec.x * sin);
+  return [x * cos - y * sin, y * cos + x * sin];
 }
 
 export interface DrawPatternFromPointsOptions extends MakeZappyOptions {
@@ -322,9 +318,10 @@ function makeZappy({
           getNoise(i + progress - zSeed, 69420, seed)
           * maxVariance
           * Math.min(1, 8 * (0.5 - Math.abs(0.5 - progress)));
-        const randomHop = new Vec2(r * Math.cos(theta), r * Math.sin(theta));
         // Then record the new location.
-        zappyPts.push(Vec2.clone(pos).add(randomHop));
+        zappyPts.push(
+          Vec2.clone(pos).add([r * Math.cos(theta), r * Math.sin(theta)]),
+        );
 
         if (j == hops) {
           // Finally, we hit the destination, add that too
