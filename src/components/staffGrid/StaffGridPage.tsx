@@ -18,7 +18,7 @@ export default function StaffGridPage() {
   const isTouchscreen = useIsTouchscreen();
 
   const [patterns, patternsHandlers, patternsHistory] = useStateHistory<
-    ResolvedPattern[]
+    readonly ResolvedPattern[]
   >([]);
 
   const [patternType, setPatternType] = useState(DEFAULT_PATTERN_TYPE);

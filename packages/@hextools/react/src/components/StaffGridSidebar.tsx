@@ -19,8 +19,8 @@ export interface StaffGridSidebarProps extends Pick<
   DrawerProps,
   "opened" | "onClose"
 > {
-  patterns: ResolvedPattern[];
-  onPatternsChange: (patterns: ResolvedPattern[]) => unknown;
+  patterns: readonly ResolvedPattern[];
+  onPatternsChange: (patterns: readonly ResolvedPattern[]) => unknown;
 }
 
 export function StaffGridSidebar({

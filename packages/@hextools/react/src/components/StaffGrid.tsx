@@ -14,8 +14,8 @@ import {
 } from "@hextools/renderer/staffGrid";
 
 export interface StaffGridProps {
-  patterns: ResolvedPattern[];
-  onPatternsChange: (patterns: ResolvedPattern[]) => unknown;
+  patterns: readonly ResolvedPattern[];
+  onPatternsChange: (patterns: readonly ResolvedPattern[]) => unknown;
   patternType: ResolvedPatternType;
   settings: GuiSpellcastingSettings;
   ref?: React.Ref<StaffGridRef>;

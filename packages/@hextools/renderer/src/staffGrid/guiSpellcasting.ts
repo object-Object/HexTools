@@ -36,14 +36,14 @@ export class GuiSpellcasting {
   gl: WebGL2RenderingContext;
   settings: GuiSpellcastingSettings;
   patternType: ResolvedPatternType;
-  onPatternsChange?: (resolvedPatterns: ResolvedPattern[]) => unknown;
+  onPatternsChange?: (resolvedPatterns: readonly ResolvedPattern[]) => unknown;
 
   private shader: PositionColorShader;
   private buf: BufferBuilder;
 
   private drawState: PatternDrawState = BETWEEN_PATTERNS;
   private usedSpots = new Set<string>();
-  private patterns: ResolvedPattern[] = [];
+  private patterns: readonly ResolvedPattern[] = [];
 
   constructor({
     gl,
@@ -55,7 +55,7 @@ export class GuiSpellcasting {
     GuiSpellcasting,
     "gl" | "settings" | "patternType" | "onPatternsChange"
   > & {
-    patterns: ResolvedPattern[];
+    patterns: readonly ResolvedPattern[];
   }) {
     this.gl = gl;
     this.settings = settings;
@@ -103,7 +103,7 @@ export class GuiSpellcasting {
     this.onPatternsChange?.(this.patterns);
   }
 
-  setPatterns(resolvedPatterns: ResolvedPattern[], notify: boolean) {
+  setPatterns(resolvedPatterns: readonly ResolvedPattern[], notify: boolean) {
     this.patterns = resolvedPatterns;
     this.usedSpots.clear();
     for (const { pattern, origin } of resolvedPatterns) {
