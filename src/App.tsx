@@ -90,6 +90,6 @@ export default function App() {
 }
 
 const routes = [
-  { path: "/Swindler", label: "Swindler", component: SwindlerStacks },
   { path: "/StaffGrid", label: "Staff Grid", component: StaffGridPage },
+  { path: "/Swindler", label: "Swindler", component: SwindlerStacks },
 ];
