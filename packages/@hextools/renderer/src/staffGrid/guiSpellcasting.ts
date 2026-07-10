@@ -29,6 +29,7 @@ export interface GuiSpellcastingSettings {
   clickingTogglesDrawing: boolean;
   zappyOnShake: boolean;
   shakeAction: "none" | "undo" | "clear";
+  enableEditingPatterns: boolean;
 }
 
 // https://github.com/FallingColors/HexMod/blob/724c36bba6a97f97d16f95d16f7addb700e62443/Common/src/main/java/at/petrak/hexcasting/client/gui/GuiSpellcasting.kt
@@ -42,7 +43,8 @@ export class GuiSpellcasting {
   private buf: BufferBuilder;
 
   private drawState: PatternDrawState = BETWEEN_PATTERNS;
-  private usedSpots = new Set<string>();
+  /** Map from stringified coord to index in this.patterns */
+  private usedSpots = new Map<string, number>();
   private patterns: readonly ResolvedPattern[] = [];
 
   constructor({
@@ -98,7 +100,7 @@ export class GuiSpellcasting {
     const { pattern, origin } = resolvedPattern;
     this.patterns = [...this.patterns, resolvedPattern];
     for (const pos of pattern.positions(origin)) {
-      this.usedSpots.add(HexCoord.toString(pos));
+      this.usedSpots.set(HexCoord.toString(pos), this.patterns.length - 1);
     }
     this.onPatternsChange?.(this.patterns);
   }
@@ -106,9 +108,9 @@ export class GuiSpellcasting {
   setPatterns(resolvedPatterns: readonly ResolvedPattern[], notify: boolean) {
     this.patterns = resolvedPatterns;
     this.usedSpots.clear();
-    for (const { pattern, origin } of resolvedPatterns) {
+    for (const [index, { pattern, origin }] of resolvedPatterns.entries()) {
       for (const pos of pattern.positions(origin)) {
-        this.usedSpots.add(HexCoord.toString(pos));
+        this.usedSpots.set(HexCoord.toString(pos), index);
       }
     }
     if (notify) {
@@ -133,9 +135,48 @@ export class GuiSpellcasting {
     const mx = clamp(mouseX, 0, this.width);
     const my = clamp(mouseY, 0, this.height);
     if (this.drawState.type === "betweenPatterns") {
-      const coord = this.pxToCoord(new Vec2(mx, my));
-      if (!this.usedSpots.has(HexCoord.toString(coord))) {
-        this.drawState = { type: "justStarted", start: coord };
+      const mouseCoord = this.pxToCoord(new Vec2(mx, my));
+      const usedIndex = this.usedSpots.get(HexCoord.toString(mouseCoord));
+      if (usedIndex === undefined) {
+        this.drawState = {
+          type: "justStarted",
+          origin: mouseCoord,
+          editedPattern: null,
+        };
+      } else if (this.settings.enableEditingPatterns) {
+        const resolvedPattern = this.patterns[usedIndex];
+        const { pattern, origin } = resolvedPattern;
+        const editedPattern = { index: usedIndex, resolvedPattern };
+
+        // Trim the pattern to the last position matching where the mouse clicked,
+        // so if there are overlaps we take the longest possible section
+        let lastIndex = null;
+        let compass = pattern.startDir;
+        let cursor = HexCoord.shiftedBy(origin, compass);
+        for (const [index, a] of pattern.angles.entries()) {
+          compass = HexDir.rotatedBy(compass, a);
+          cursor = HexCoord.shiftedBy(cursor, compass);
+          if (HexCoord.equals(cursor, mouseCoord)) {
+            lastIndex = index;
+          }
+        }
+
+        this.drawState =
+          lastIndex !== null
+            ? {
+                type: "drawing",
+                origin,
+                current: mouseCoord,
+                wipPattern: pattern.withAngles(
+                  pattern.angles.slice(0, lastIndex + 1),
+                ),
+                editedPattern,
+              }
+            : {
+                type: "justStarted",
+                origin,
+                editedPattern,
+              };
       }
     }
   }
@@ -166,7 +207,7 @@ export class GuiSpellcasting {
       case "betweenPatterns":
         return;
       case "justStarted":
-        anchorCoord = this.drawState.start;
+        anchorCoord = this.drawState.origin;
         break;
       case "drawing":
         anchorCoord = this.drawState.current;
@@ -183,15 +224,16 @@ export class GuiSpellcasting {
       const snappedAngle = mod(angle / (Math.PI * 2), 6);
       const newdir: HexDir = mod(Math.round(snappedAngle * 6) + 1, 6);
       const idealNextLoc = HexCoord.shiftedBy(anchorCoord, newdir);
-      if (!this.usedSpots.has(HexCoord.toString(idealNextLoc))) {
+      if (!this.getPatternAt(idealNextLoc)) {
         if (this.drawState.type === "justStarted") {
           const pat = new HexPattern(newdir);
 
           this.drawState = {
             type: "drawing",
-            start: anchorCoord,
+            origin: anchorCoord,
             current: idealNextLoc,
             wipPattern: pat,
+            editedPattern: this.drawState.editedPattern,
           };
         } else {
           const lastDir = this.drawState.wipPattern.finalDir();
@@ -199,17 +241,21 @@ export class GuiSpellcasting {
             if (this.drawState.wipPattern.angles.length === 0) {
               this.drawState = {
                 type: "justStarted",
-                start: HexCoord.shiftedBy(this.drawState.current, newdir),
+                origin: HexCoord.shiftedBy(this.drawState.current, newdir),
+                editedPattern: this.drawState.editedPattern,
               };
             } else {
-              this.drawState.current = HexCoord.shiftedBy(
-                this.drawState.current,
-                newdir,
+              const { current, wipPattern } = this.drawState;
+              this.drawState.current = HexCoord.shiftedBy(current, newdir);
+              this.drawState.wipPattern = wipPattern.withAngles(
+                wipPattern.angles.slice(0, -1),
               );
-              this.drawState.wipPattern.angles.pop();
             }
           } else {
-            if (this.drawState.wipPattern.tryAppendDir(newdir)) {
+            const newWipPattern =
+              this.drawState.wipPattern.tryAppendDir(newdir);
+            if (newWipPattern) {
+              this.drawState.wipPattern = newWipPattern;
               this.drawState.current = idealNextLoc;
             }
           }
@@ -232,13 +278,28 @@ export class GuiSpellcasting {
         this.drawState = BETWEEN_PATTERNS;
         break;
       case "drawing": {
-        const { start, wipPattern } = this.drawState;
+        const { origin, wipPattern, editedPattern } = this.drawState;
         this.drawState = BETWEEN_PATTERNS;
-        this.addPattern({
-          pattern: wipPattern,
-          origin: start,
-          type: this.patternType,
-        });
+        if (editedPattern) {
+          const {
+            index,
+            resolvedPattern: { type },
+          } = editedPattern;
+          this.setPatterns(
+            [
+              ...this.patterns.slice(0, index),
+              { pattern: wipPattern, origin, type },
+              ...this.patterns.slice(index + 1),
+            ],
+            true,
+          );
+        } else {
+          this.addPattern({
+            pattern: wipPattern,
+            origin,
+            type: this.patternType,
+          });
+        }
         break;
       }
     }
@@ -281,7 +342,7 @@ export class GuiSpellcasting {
           mouseCoord,
           settings.mouseDotsRadius,
         )) {
-          if (!this.usedSpots.has(HexCoord.toString(dotCoord))) {
+          if (!this.getPatternAt(dotCoord)) {
             const dotPx = this.coordToPx(dotCoord);
             const delta = Vec2.clone(dotPx).sub(mouseVec).mag;
             const scaledDist = clamp(
@@ -346,17 +407,23 @@ export class GuiSpellcasting {
       isCtrlDown: isCtrlDown !== settings.ctrlTogglesOffStrokeOrder,
     } satisfies Partial<DrawPatternFromPointsOptions>;
 
+    const editingIndex =
+      this.drawState.type !== "betweenPatterns"
+        ? this.drawState.editedPattern?.index
+        : undefined;
     for (const [i, { pattern, origin, type }] of this.patterns.entries()) {
-      drawPatternFromPoints({
-        points: [...pattern.toLines(this.hexSize, this.coordToPx(origin))],
-        dupIndices: findDupIndices(pattern.positions()),
-        drawLast: true,
-        tail: { ...type.color, a: RESOLVED_PATTERN_ALPHA },
-        head: { ...type.fadeColor, a: RESOLVED_PATTERN_ALPHA },
-        flowIrregular: (type.success ? 0.2 : 0.9) * zappyMultiplier,
-        seed: i,
-        ...commonPatternOptions,
-      });
+      if (i !== editingIndex) {
+        drawPatternFromPoints({
+          points: [...pattern.toLines(this.hexSize, this.coordToPx(origin))],
+          dupIndices: findDupIndices(pattern.positions()),
+          drawLast: true,
+          tail: { ...type.color, a: RESOLVED_PATTERN_ALPHA },
+          head: { ...type.fadeColor, a: RESOLVED_PATTERN_ALPHA },
+          flowIrregular: (type.success ? 0.2 : 0.9) * zappyMultiplier,
+          seed: i,
+          ...commonPatternOptions,
+        });
+      }
     }
 
     if (this.drawState.type !== "betweenPatterns") {
@@ -364,11 +431,11 @@ export class GuiSpellcasting {
       let dupIndices = new Set<number>();
 
       if (this.drawState.type === "justStarted") {
-        points.push(this.coordToPx(this.drawState.start));
+        points.push(this.coordToPx(this.drawState.origin));
       } else {
         dupIndices = findDupIndices(this.drawState.wipPattern.positions());
         for (const pos of this.drawState.wipPattern.positions()) {
-          const shiftedPos = HexCoord.shiftedBy(pos, this.drawState.start);
+          const shiftedPos = HexCoord.shiftedBy(pos, this.drawState.origin);
           points.push(this.coordToPx(shiftedPos));
         }
       }
@@ -404,6 +471,18 @@ export class GuiSpellcasting {
     return pxToCoord({ px, size: this.hexSize, offset: this.coordsOffset });
   }
 
+  getPatternAt(coord: HexCoord): ResolvedPattern | null {
+    const index = this.usedSpots.get(HexCoord.toString(coord));
+    if (
+      index === undefined
+      || (this.drawState.type !== "betweenPatterns"
+        && this.drawState.editedPattern?.index === index)
+    ) {
+      return null;
+    }
+    return this.patterns[index];
+  }
+
   static getDefaultSettings({
     isTouchscreen,
   }: {
@@ -420,6 +499,7 @@ export class GuiSpellcasting {
       clickingTogglesDrawing: false,
       shakeAction: "none",
       zappyOnShake: false,
+      enableEditingPatterns: true,
     };
   }
 }
@@ -437,14 +517,21 @@ interface BetweenPatterns {
 
 interface JustStarted {
   type: "justStarted";
-  start: HexCoord;
+  origin: HexCoord;
+  editedPattern: EditedPattern | null;
 }
 
 interface Drawing {
   type: "drawing";
-  start: HexCoord;
+  origin: HexCoord;
   current: HexCoord;
   wipPattern: HexPattern;
+  editedPattern: EditedPattern | null;
+}
+
+interface EditedPattern {
+  index: number;
+  resolvedPattern: ResolvedPattern;
 }
 
 const BETWEEN_PATTERNS: BetweenPatterns = { type: "betweenPatterns" };

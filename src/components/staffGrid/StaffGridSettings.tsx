@@ -42,6 +42,7 @@ export default function StaffGridSettings({
     clickingTogglesDrawing,
     zappyOnShake,
     shakeAction,
+    enableEditingPatterns,
   } = settings;
 
   const [opened, { open, close }] = useDisclosure(false);
@@ -136,6 +137,12 @@ export default function StaffGridSettings({
             label="Clicking Toggles Drawing"
             checked={clickingTogglesDrawing}
             onChange={getSwitchSetter("clickingTogglesDrawing")}
+          />
+
+          <Switch
+            label="Click To Edit Patterns"
+            checked={enableEditingPatterns}
+            onChange={getSwitchSetter("enableEditingPatterns")}
           />
 
           <InputWrapper

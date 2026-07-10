@@ -52,6 +52,10 @@ export const HexCoord = {
       r: coord.r,
     };
   },
+
+  equals(coord: HexCoord, other: HexCoord) {
+    return coord.q === other.q && coord.r === other.r;
+  },
 };
 
 export enum HexDir {
@@ -119,11 +123,11 @@ const angleToLetter: Record<HexAngle, string> = {
 
 export class HexPattern {
   constructor(
-    public startDir: HexDir,
-    public angles: HexAngle[] = [],
+    public readonly startDir: HexDir,
+    public readonly angles: readonly HexAngle[] = [],
   ) {}
 
-  tryAppendDir(newDir: HexDir): boolean {
+  tryAppendDir(newDir: HexDir): HexPattern | null {
     const linesSeen = new Set<string>();
 
     let cursor = { q: 0, r: 0 };
@@ -138,15 +142,14 @@ export class HexPattern {
     cursor = HexCoord.shiftedBy(cursor, compass);
 
     if (linesSeen.has(`${HexCoord.toString(cursor)},${newDir}`)) {
-      return false;
+      return null;
     }
     const nextAngle = HexDir.angleFrom(newDir, compass);
     if (nextAngle === HexAngle.BACK) {
-      return false;
+      return null;
     }
 
-    this.angles.push(nextAngle);
-    return true;
+    return this.withAngles([...this.angles, nextAngle]);
   }
 
   finalDir(): HexDir {
@@ -183,5 +186,9 @@ export class HexPattern {
   toShorthand(): string {
     const signature = this.anglesSignature();
     return `${HexDir.toShorthand(this.startDir)} ${signature}`;
+  }
+
+  withAngles(newAngles: readonly HexAngle[]): HexPattern {
+    return new HexPattern(this.startDir, newAngles);
   }
 }
