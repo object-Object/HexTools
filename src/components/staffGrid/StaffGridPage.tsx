@@ -70,6 +70,7 @@ export default function StaffGridPage() {
         patterns={patterns}
         onPatternsChange={patternsHandlers.set}
         patternType={patternType}
+        onPatternTypeChange={setPatternType}
         settings={settings}
         ref={staffGridRef}
       />

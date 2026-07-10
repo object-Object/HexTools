@@ -122,10 +122,14 @@ const angleToLetter: Record<HexAngle, string> = {
 };
 
 export class HexPattern {
+  public readonly signature: string;
+
   constructor(
     public readonly startDir: HexDir,
     public readonly angles: readonly HexAngle[] = [],
-  ) {}
+  ) {
+    this.signature = this.angles.map((angle) => angleToLetter[angle]).join("");
+  }
 
   tryAppendDir(newDir: HexDir): HexPattern | null {
     const linesSeen = new Set<string>();
@@ -174,18 +178,12 @@ export class HexPattern {
     }
   }
 
-  anglesSignature(): string {
-    return this.angles.map((angle) => angleToLetter[angle]).join("");
-  }
-
   toString(): string {
-    const signature = this.anglesSignature();
-    return `${HexDir[this.startDir]} ${signature}`;
+    return `${HexDir[this.startDir]} ${this.signature}`;
   }
 
   toShorthand(): string {
-    const signature = this.anglesSignature();
-    return `${HexDir.toShorthand(this.startDir)} ${signature}`;
+    return `${HexDir.toShorthand(this.startDir)} ${this.signature}`;
   }
 
   withAngles(newAngles: readonly HexAngle[]): HexPattern {

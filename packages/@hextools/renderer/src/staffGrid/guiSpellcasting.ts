@@ -16,7 +16,12 @@ import {
   findDupIndices,
   type DrawPatternFromPointsOptions,
 } from "./renderLib";
-import type { ResolvedPattern, ResolvedPatternType } from "./resolvedPattern";
+import {
+  PATTERN_TYPES,
+  type NamedResolvedPatternType,
+  type ResolvedPattern,
+  type ResolvedPatternType,
+} from "./resolvedPattern";
 
 export interface GuiSpellcastingSettings {
   guiScale: number;
@@ -30,6 +35,7 @@ export interface GuiSpellcastingSettings {
   zappyOnShake: boolean;
   shakeAction: "none" | "undo" | "clear";
   enableEditingPatterns: boolean;
+  autoPatternType: boolean;
 }
 
 // https://github.com/FallingColors/HexMod/blob/724c36bba6a97f97d16f95d16f7addb700e62443/Common/src/main/java/at/petrak/hexcasting/client/gui/GuiSpellcasting.kt
@@ -38,6 +44,7 @@ export class GuiSpellcasting {
   settings: GuiSpellcastingSettings;
   patternType: ResolvedPatternType;
   onPatternsChange?: (resolvedPatterns: readonly ResolvedPattern[]) => unknown;
+  onPatternTypeChange?: (type: NamedResolvedPatternType) => unknown;
 
   private shader: PositionColorShader;
   private buf: BufferBuilder;
@@ -46,16 +53,23 @@ export class GuiSpellcasting {
   /** Map from stringified coord to index in this.patterns */
   private usedSpots = new Map<string, number>();
   private patterns: readonly ResolvedPattern[] = [];
+  private parenCount = 0;
+  private escapeNext = false;
 
   constructor({
     gl,
     settings,
     patternType,
     onPatternsChange,
+    onPatternTypeChange,
     patterns,
   }: Pick<
     GuiSpellcasting,
-    "gl" | "settings" | "patternType" | "onPatternsChange"
+    | "gl"
+    | "settings"
+    | "patternType"
+    | "onPatternsChange"
+    | "onPatternTypeChange"
   > & {
     patterns: readonly ResolvedPattern[];
   }) {
@@ -63,6 +77,7 @@ export class GuiSpellcasting {
     this.settings = settings;
     this.patternType = patternType;
     this.onPatternsChange = onPatternsChange;
+    this.onPatternTypeChange = onPatternTypeChange;
     this.setPatterns(patterns, false);
 
     gl.clearColor(0, 0, 0, 0);
@@ -96,19 +111,32 @@ export class GuiSpellcasting {
     return value / this.settings.guiScale;
   }
 
-  addPattern(resolvedPattern: ResolvedPattern) {
+  addPattern(inputResolvedPattern: ResolvedPattern) {
+    // let's not mutate the actual input
+    const resolvedPattern = { ...inputResolvedPattern };
+    const newType = this.resolveAutoPatternType(
+      resolvedPattern.pattern.signature,
+    );
+    if (this.settings.autoPatternType && newType !== null) {
+      resolvedPattern.type = newType;
+    }
+
     const { pattern, origin } = resolvedPattern;
     this.patterns = [...this.patterns, resolvedPattern];
     for (const pos of pattern.positions(origin)) {
       this.usedSpots.set(HexCoord.toString(pos), this.patterns.length - 1);
     }
     this.onPatternsChange?.(this.patterns);
+    this.maybeUpdatePatternType();
   }
 
   setPatterns(resolvedPatterns: readonly ResolvedPattern[], notify: boolean) {
     this.patterns = resolvedPatterns;
     this.usedSpots.clear();
+    this.parenCount = 0;
+    this.escapeNext = false;
     for (const [index, { pattern, origin }] of resolvedPatterns.entries()) {
+      this.resolveAutoPatternType(pattern.signature);
       for (const pos of pattern.positions(origin)) {
         this.usedSpots.set(HexCoord.toString(pos), index);
       }
@@ -116,6 +144,7 @@ export class GuiSpellcasting {
     if (notify) {
       this.onPatternsChange?.(this.patterns);
     }
+    this.maybeUpdatePatternType();
   }
 
   mouseClicked(rawMousePos: MousePos) {
@@ -483,6 +512,54 @@ export class GuiSpellcasting {
     return this.patterns[index];
   }
 
+  private maybeUpdatePatternType() {
+    if (this.settings.autoPatternType) {
+      this.setPatternType(
+        this.parenCount > 0 || this.escapeNext
+          ? PATTERN_TYPES.Escaped
+          : PATTERN_TYPES.Evaluated,
+      );
+    }
+  }
+
+  private setPatternType(type: NamedResolvedPatternType) {
+    if (type !== this.patternType) {
+      this.patternType = type;
+      this.onPatternTypeChange?.(type);
+    }
+  }
+
+  private resolveAutoPatternType(
+    signature: string,
+  ): ResolvedPatternType | null {
+    if (this.escapeNext) {
+      this.escapeNext = false;
+      return null;
+    }
+
+    switch (signature) {
+      case INTROSPECTION:
+        this.parenCount++;
+        return null;
+      case RETROSPECTION:
+        switch (this.parenCount) {
+          case 0:
+            return PATTERN_TYPES.Errored;
+          case 1:
+            this.parenCount--;
+            return PATTERN_TYPES.Evaluated;
+          default:
+            this.parenCount--;
+            return null;
+        }
+      case CONSIDERATION:
+        this.escapeNext = true;
+        return PATTERN_TYPES.Evaluated;
+      default:
+        return null;
+    }
+  }
+
   static getDefaultSettings({
     isTouchscreen,
   }: {
@@ -500,6 +577,7 @@ export class GuiSpellcasting {
       shakeAction: "none",
       zappyOnShake: false,
       enableEditingPatterns: true,
+      autoPatternType: true,
     };
   }
 }
@@ -554,3 +632,7 @@ const RESOLVED_PATTERN_ALPHA = 0xc8 / 0xff;
 
 const WIP_PATTERN_TAIL = RGBAColor.fromRGB(0x64c8ff);
 const WIP_PATTERN_HEAD = RGBAColor.fromRGB(0xfecbe6);
+
+const INTROSPECTION = "qqq";
+const RETROSPECTION = "eee";
+const CONSIDERATION = "qqqaw";

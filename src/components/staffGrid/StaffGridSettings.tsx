@@ -43,6 +43,7 @@ export default function StaffGridSettings({
     zappyOnShake,
     shakeAction,
     enableEditingPatterns,
+    autoPatternType,
   } = settings;
 
   const [opened, { open, close }] = useDisclosure(false);
@@ -143,6 +144,12 @@ export default function StaffGridSettings({
             label="Click To Edit Patterns"
             checked={enableEditingPatterns}
             onChange={getSwitchSetter("enableEditingPatterns")}
+          />
+
+          <Switch
+            label="Automatically Set Pattern Color"
+            checked={autoPatternType}
+            onChange={getSwitchSetter("autoPatternType")}
           />
 
           <InputWrapper

@@ -71,7 +71,7 @@ export default function StaffGridPalette({
           {...staffGridButtonProps}
           onClick={() => combobox.toggleDropdown()}
         >
-          <IconPalette />
+          <IconPalette color={RGBColor.toCSS(patternType.color)} />
         </ActionIcon>
       </Combobox.Target>
 
