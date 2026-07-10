@@ -541,6 +541,7 @@ export class GuiSpellcasting {
       case INTROSPECTION:
         this.parenCount++;
         return null;
+
       case RETROSPECTION:
         switch (this.parenCount) {
           case 0:
@@ -552,9 +553,11 @@ export class GuiSpellcasting {
             this.parenCount--;
             return null;
         }
+
       case CONSIDERATION:
         this.escapeNext = true;
         return PATTERN_TYPES.Evaluated;
+
       default:
         return null;
     }
