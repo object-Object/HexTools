@@ -1,4 +1,3 @@
-import { Box } from "@mantine/core";
 import React, {
   useEffect,
   useEffectEvent,
@@ -179,10 +178,10 @@ export function StaffGrid({
   }, [patterns]);
 
   return (
-    <Box
-      pos="absolute"
-      inset="0"
+    <div
       style={{
+        position: "absolute",
+        inset: "0",
         overflow: "hidden",
         // Prevent iOS select on press and hold
         // https://stackoverflow.com/a/78378759
@@ -202,7 +201,7 @@ export function StaffGrid({
           touchAction: "pinch-zoom",
         }}
       />
-    </Box>
+    </div>
   );
 }
 
