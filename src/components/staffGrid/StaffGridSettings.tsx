@@ -86,6 +86,9 @@ export default function StaffGridSettings({
         onClose={close}
         fullScreen={isMobile}
         title="Settings"
+        removeScrollProps={{
+          allowPinchZoom: true, // Allow pinch to zoom on mobile devices
+        }}
       >
         <Stack>
           <Button
