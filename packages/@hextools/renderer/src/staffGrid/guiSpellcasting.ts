@@ -55,6 +55,7 @@ export class GuiSpellcasting {
   private patterns: readonly ResolvedPattern[] = [];
   private parenCount = 0;
   private escapeNext = false;
+  private panOffset = new Vec2();
 
   constructor({
     gl,
@@ -225,6 +226,13 @@ export class GuiSpellcasting {
     if (!this.settings.clickingTogglesDrawing) {
       this.drawMove(mousePos);
     }
+  }
+
+  mousePanned(rawMouseDelta: MousePos) {
+    const { mouseX, mouseY } = this.scaleMousePos(rawMouseDelta);
+    this.panOffset.x += mouseX;
+    this.panOffset.y += mouseY;
+    this.drawState = BETWEEN_PATTERNS;
   }
 
   private drawMove({ mouseX, mouseY }: MousePos) {
@@ -489,7 +497,7 @@ export class GuiSpellcasting {
   }
 
   get coordsOffset() {
-    return new Vec2(this.width * 0.5, this.height * 0.5);
+    return new Vec2(this.width * 0.5, this.height * 0.5).add(this.panOffset);
   }
 
   coordToPx(coord: HexCoord) {

@@ -41,6 +41,7 @@ export function StaffGrid({
   const mouseYRef = useRef(0);
   const isCtrlDownRef = useRef(false);
   const zappyMultiplierRef = useRef(1);
+  const activePointerEventsRef = useRef<React.PointerEvent[]>([]);
 
   useImperativeHandle(
     ref,
@@ -64,6 +65,7 @@ export function StaffGrid({
   };
 
   const handlePointerDown = (event: React.PointerEvent) => {
+    activePointerEventsRef.current.push(event);
     if (updateMouseRefs(event)) {
       guiRef.current?.mouseClicked({
         mouseX: mouseXRef.current,
@@ -76,7 +78,13 @@ export function StaffGrid({
 
   const handlePointerMove = (event: React.PointerEvent) => {
     if (updateMouseRefs(event)) {
-      if (event.buttons !== 0) {
+      // 4 = middle click
+      if (activePointerEventsRef.current.length > 1 || event.buttons & 4) {
+        guiRef.current?.mousePanned({
+          mouseX: event.movementX,
+          mouseY: event.movementY,
+        });
+      } else if (event.buttons !== 0) {
         guiRef.current?.mouseDragged({
           mouseX: mouseXRef.current,
           mouseY: mouseYRef.current,
@@ -90,13 +98,24 @@ export function StaffGrid({
     }
   };
 
+  const removePointerEvent = (event: React.PointerEvent) => {
+    const index = activePointerEventsRef.current.findIndex(
+      ({ pointerId }) => pointerId === event.pointerId,
+    );
+    if (index > -1) {
+      activePointerEventsRef.current.splice(index, 1);
+    }
+  };
+
   const handlePointerUp = (event: React.PointerEvent) => {
+    removePointerEvent(event);
     if (updateMouseRefs(event)) {
       guiRef.current?.mouseReleased();
     }
   };
 
   const handlePointerCancel = (event: React.PointerEvent) => {
+    removePointerEvent(event);
     if (updateMouseRefs(event)) {
       guiRef.current?.mouseCanceled();
     }
@@ -198,7 +217,9 @@ export function StaffGrid({
         style={{
           width: "100%",
           height: "100%",
-          touchAction: "pinch-zoom",
+          // For two-finger panning to work without conflicting with pinch-to-zoom,
+          // we need to disable pinch-to-zoom by setting this to none
+          touchAction: "none",
         }}
       />
     </div>
