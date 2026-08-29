@@ -1,3 +1,6 @@
+import { RestrictToElement } from "@dnd-kit/dom/modifiers";
+import { move } from "@dnd-kit/helpers";
+import { DragDropProvider } from "@dnd-kit/react";
 import {
   ActionIcon,
   Button,
@@ -90,21 +93,47 @@ export function StaffGridSidebar({
       opened={opened}
       onClose={onClose}
     >
-      <Stack gap="xs">
-        {patterns.map((pattern, index) => (
-          <StaffGridSidebarPattern
-            key={HexCoord.toString(pattern.origin)}
-            pattern={pattern.pattern}
-            onPan={() => {
-              onPanToPattern(pattern);
-              onClose();
-            }}
-            onDelete={() => {
-              onPatternsChange(patterns.filter((_resolved, i) => i !== index));
-            }}
-          />
-        ))}
-      </Stack>
+      <DragDropProvider
+        onDragEnd={(event) => {
+          onPatternsChange(
+            // hacky hacky hack
+            move(
+              patterns.map((pattern) => ({
+                ...pattern,
+                id: HexCoord.toString(pattern.origin),
+              })),
+              event,
+            ).map(({ id: _, ...pattern }) => pattern),
+          );
+        }}
+        modifiers={[
+          RestrictToElement.configure({
+            element(operation) {
+              return operation.source?.element?.parentElement ?? null;
+            },
+          }),
+        ]}
+      >
+        <Stack gap="xs">
+          {patterns.map((pattern, index) => (
+            <StaffGridSidebarPattern
+              key={HexCoord.toString(pattern.origin)}
+              id={HexCoord.toString(pattern.origin)}
+              index={index}
+              pattern={pattern.pattern}
+              onPan={() => {
+                onPanToPattern(pattern);
+                onClose();
+              }}
+              onDelete={() => {
+                onPatternsChange(
+                  patterns.filter((_resolved, i) => i !== index),
+                );
+              }}
+            />
+          ))}
+        </Stack>
+      </DragDropProvider>
     </Drawer>
   );
 }

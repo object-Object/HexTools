@@ -1,22 +1,39 @@
+import { useSortable } from "@dnd-kit/react/sortable";
 import { ActionIcon, Group, Text } from "@mantine/core";
-import { IconCopy, IconX, IconZoom } from "@tabler/icons-react";
+import {
+  IconCopy,
+  IconGripVertical,
+  IconX,
+  IconZoom,
+} from "@tabler/icons-react";
 
 import { HexPattern } from "@hextools/renderer/staffGrid";
 
 export interface StaffGridSidebarPatternProps {
+  id: string;
+  index: number;
   pattern: HexPattern;
   onPan: () => unknown;
   onDelete: () => unknown;
 }
 
 export function StaffGridSidebarPattern({
+  id,
+  index,
   pattern,
   onPan,
   onDelete,
 }: StaffGridSidebarPatternProps) {
+  const { ref, handleRef, isDragging } = useSortable({ id, index });
+
   const text = pattern.toString();
   return (
-    <Group align="center" wrap="nowrap" gap="sm">
+    <Group ref={ref} align="center" wrap="nowrap" gap="sm">
+      <IconGripVertical
+        ref={handleRef}
+        style={{ cursor: isDragging ? "grabbing" : "grab", flexShrink: 0 }}
+      />
+
       <Text
         ff="monospace"
         style={{

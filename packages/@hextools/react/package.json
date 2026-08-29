@@ -17,6 +17,9 @@
     "prepack": "vite build"
   },
   "dependencies": {
+    "@dnd-kit/dom": "^0.4.0",
+    "@dnd-kit/helpers": "^0.4.0",
+    "@dnd-kit/react": "^0.4.0",
     "@hextools/renderer": "workspace:^",
     "@mantine/core": "^9.1.0",
     "@mantine/hooks": "^9.1.0",

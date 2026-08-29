@@ -769,6 +769,9 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@hextools/react@workspace:packages/@hextools/react"
   dependencies:
+    "@dnd-kit/dom": "npm:^0.4.0"
+    "@dnd-kit/helpers": "npm:^0.4.0"
+    "@dnd-kit/react": "npm:^0.4.0"
     "@hextools/renderer": "workspace:^"
     "@mantine/core": "npm:^9.1.0"
     "@mantine/hooks": "npm:^9.1.0"
