@@ -23,8 +23,9 @@ export interface StaffGridProps {
 }
 
 export interface StaffGridRef {
-  cancelPattern: () => void;
+  panToPattern: (pattern: ResolvedPattern) => void;
   resetPanAndZoom: () => void;
+  cancelPattern: () => void;
   setZappyMultiplier: (value: number) => void;
 }
 
@@ -48,11 +49,14 @@ export function StaffGrid({
   useImperativeHandle(
     ref,
     () => ({
-      cancelPattern: () => {
-        guiRef.current?.mouseCanceled();
+      panToPattern: (pattern) => {
+        guiRef.current?.panToPattern(pattern);
       },
       resetPanAndZoom: () => {
         guiRef.current?.resetPanAndZoom();
+      },
+      cancelPattern: () => {
+        guiRef.current?.mouseCanceled();
       },
       setZappyMultiplier: (value) => {
         zappyMultiplierRef.current = value;
@@ -143,11 +147,10 @@ export function StaffGrid({
     prevPointerDistanceRef.current = 0;
 
     // pan
-    const index = activePointerEvents.findIndex(
-      ({ pointerId }) => pointerId === event.pointerId,
-    );
-    if (index > -1) {
-      activePointerEvents.splice(index, 1);
+    for (let i = activePointerEvents.length - 1; i >= 0; i--) {
+      if (activePointerEvents[i].pointerId === event.pointerId) {
+        activePointerEvents.splice(i, 1);
+      }
     }
   };
 

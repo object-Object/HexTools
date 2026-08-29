@@ -1,15 +1,17 @@
 import { ActionIcon, Group, Text } from "@mantine/core";
-import { IconCopy, IconX } from "@tabler/icons-react";
+import { IconCopy, IconX, IconZoom } from "@tabler/icons-react";
 
 import { HexPattern } from "@hextools/renderer/staffGrid";
 
 export interface StaffGridSidebarPatternProps {
   pattern: HexPattern;
+  onPan: () => unknown;
   onDelete: () => unknown;
 }
 
 export function StaffGridSidebarPattern({
   pattern,
+  onPan,
   onDelete,
 }: StaffGridSidebarPatternProps) {
   const text = pattern.toString();
@@ -26,10 +28,13 @@ export function StaffGridSidebarPattern({
         {text}
       </Text>
 
+      <ActionIcon variant="transparent" size="sm" ml="auto" onClick={onPan}>
+        <IconZoom />
+      </ActionIcon>
+
       <ActionIcon
         variant="transparent"
         size="sm"
-        ml="auto"
         onClick={() => void navigator.clipboard.writeText(text)}
       >
         <IconCopy />

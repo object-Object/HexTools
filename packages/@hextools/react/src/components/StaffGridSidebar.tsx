@@ -21,11 +21,13 @@ export interface StaffGridSidebarProps extends Pick<
 > {
   patterns: readonly ResolvedPattern[];
   onPatternsChange: (patterns: readonly ResolvedPattern[]) => unknown;
+  onPanToPattern: (pattern: ResolvedPattern) => unknown;
 }
 
 export function StaffGridSidebar({
   patterns,
   onPatternsChange,
+  onPanToPattern,
   opened,
   onClose,
 }: StaffGridSidebarProps) {
@@ -89,10 +91,14 @@ export function StaffGridSidebar({
       onClose={onClose}
     >
       <Stack gap="xs">
-        {patterns.map(({ pattern, origin }, index) => (
+        {patterns.map((pattern, index) => (
           <StaffGridSidebarPattern
-            key={HexCoord.toString(origin)}
-            pattern={pattern}
+            key={HexCoord.toString(pattern.origin)}
+            pattern={pattern.pattern}
+            onPan={() => {
+              onPanToPattern(pattern);
+              onClose();
+            }}
             onDelete={() => {
               onPatternsChange(patterns.filter((_resolved, i) => i !== index));
             }}

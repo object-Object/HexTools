@@ -64,6 +64,10 @@ export default function StaffGridPage() {
     },
   });
 
+  const onPanToPattern = (pattern: ResolvedPattern) => {
+    staffGridRef.current?.panToPattern(pattern);
+  };
+
   const onResetPanAndZoom = () => {
     staffGridRef.current?.resetPanAndZoom();
   };
@@ -88,6 +92,7 @@ export default function StaffGridPage() {
         settings={settings}
         onSettingsChange={setSettings}
         onResetSettings={() => setSettings(defaultSettings)}
+        onPanToPattern={onPanToPattern}
         onResetPanAndZoom={onResetPanAndZoom}
       />
     </>

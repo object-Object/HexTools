@@ -160,6 +160,23 @@ export class HexPattern {
     return this.angles.reduce(HexDir.rotatedBy, this.startDir);
   }
 
+  midpoint(start: HexCoord = { q: 0, r: 0 }): HexCoord {
+    let minQ = start.q;
+    let maxQ = start.q;
+    let minR = start.r;
+    let maxR = start.r;
+    for (const { q, r } of this.positions(start)) {
+      minQ = Math.min(minQ, q);
+      maxQ = Math.max(maxQ, q);
+      minR = Math.min(minR, r);
+      maxR = Math.max(maxR, r);
+    }
+    return {
+      q: (minQ + maxQ) / 2,
+      r: (minR + maxR) / 2,
+    };
+  }
+
   *positions(start: HexCoord = { q: 0, r: 0 }): Generator<HexCoord> {
     let cursor = start;
     let compass = this.startDir;

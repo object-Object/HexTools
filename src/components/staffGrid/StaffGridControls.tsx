@@ -12,7 +12,7 @@ import {
   IconTrash,
 } from "@tabler/icons-react";
 
-import { StaffGridSidebar } from "@hextools/react";
+import { StaffGridSidebar, type StaffGridSidebarProps } from "@hextools/react";
 import { type ResolvedPattern } from "@hextools/renderer/staffGrid";
 
 import { staffGridButtonProps } from "./StaffGrid.lib";
@@ -23,7 +23,10 @@ import StaffGridSettings, {
 } from "./StaffGridSettings";
 
 export interface StaffGridControlsProps
-  extends StaffGridPaletteProps, StaffGridSettingsProps {
+  extends
+    StaffGridPaletteProps,
+    StaffGridSettingsProps,
+    Pick<StaffGridSidebarProps, "onPanToPattern"> {
   patterns: readonly ResolvedPattern[];
   patternsHandlers: UseStateHistoryHandlers<readonly ResolvedPattern[]>;
   patternsHistory: UseStateHistoryValue<readonly ResolvedPattern[]>;
@@ -39,6 +42,7 @@ export default function StaffGridControls({
   settings,
   onSettingsChange,
   onResetSettings,
+  onPanToPattern,
   onResetPanAndZoom,
 }: StaffGridControlsProps) {
   const [sidebarOpen, { toggle: toggleSidebar, close: closeSidebar }] =
@@ -96,6 +100,7 @@ export default function StaffGridControls({
       <StaffGridSidebar
         patterns={patterns}
         onPatternsChange={patternsHandlers.set}
+        onPanToPattern={onPanToPattern}
         opened={sidebarOpen}
         onClose={closeSidebar}
       />

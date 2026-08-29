@@ -376,6 +376,14 @@ export class GuiSpellcasting {
       .sub(this.coordsOffsetWithoutPan);
   }
 
+  panToPattern(pattern: ResolvedPattern) {
+    this.panOffset = coordToPx({
+      coord: pattern.pattern.midpoint(pattern.origin),
+      size: this.hexSize,
+      offset: new Vec2(),
+    }).negate();
+  }
+
   resetPanAndZoom() {
     this.panOffset = new Vec2();
     this.zoomMultiplier = 1;
