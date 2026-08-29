@@ -38,6 +38,9 @@ export interface GuiSpellcastingSettings {
   autoPatternType: boolean;
 }
 
+export const MIN_GRID_ZOOM = 0.25;
+export const MAX_GRID_ZOOM = 3;
+
 // https://github.com/FallingColors/HexMod/blob/724c36bba6a97f97d16f95d16f7addb700e62443/Common/src/main/java/at/petrak/hexcasting/client/gui/GuiSpellcasting.kt
 export class GuiSpellcasting {
   gl: WebGL2RenderingContext;
@@ -56,6 +59,7 @@ export class GuiSpellcasting {
   private parenCount = 0;
   private escapeNext = false;
   private panOffset = new Vec2();
+  private zoomMultiplier = 1;
 
   constructor({
     gl,
@@ -228,13 +232,6 @@ export class GuiSpellcasting {
     }
   }
 
-  mousePanned(rawMouseDelta: MousePos) {
-    const { mouseX, mouseY } = this.scaleMousePos(rawMouseDelta);
-    this.panOffset.x += mouseX;
-    this.panOffset.y += mouseY;
-    this.drawState = BETWEEN_PATTERNS;
-  }
-
   private drawMove({ mouseX, mouseY }: MousePos) {
     const mx = clamp(mouseX, 0, this.width);
     const my = clamp(mouseY, 0, this.height);
@@ -344,6 +341,44 @@ export class GuiSpellcasting {
 
   mouseCanceled() {
     this.drawState = BETWEEN_PATTERNS;
+  }
+
+  mousePanned(rawMouseDelta: MousePos) {
+    const { mouseX, mouseY } = this.scaleMousePos(rawMouseDelta);
+    this.panOffset.x += mouseX;
+    this.panOffset.y += mouseY;
+    this.drawState = BETWEEN_PATTERNS;
+  }
+
+  mouseZoomed({
+    mousePos: rawMousePos,
+    zoomMultiplier: rawZoomMultiplier,
+  }: {
+    mousePos: MousePos;
+    zoomMultiplier: number;
+  }) {
+    const { mouseX, mouseY } = this.scaleMousePos(rawMousePos);
+
+    // current world point under the mouse
+    const worldBefore = new Vec2(mouseX, mouseY)
+      .sub(this.coordsOffset)
+      .scale(1 / this.hexSize);
+
+    this.zoomMultiplier =
+      clamp(
+        this.settings.gridZoom * this.zoomMultiplier * rawZoomMultiplier,
+        MIN_GRID_ZOOM,
+        MAX_GRID_ZOOM,
+      ) / this.settings.gridZoom;
+
+    this.panOffset = new Vec2(mouseX, mouseY)
+      .sub(worldBefore.scale(this.hexSize))
+      .sub(this.coordsOffsetWithoutPan);
+  }
+
+  resetPanAndZoom() {
+    this.panOffset = new Vec2();
+    this.zoomMultiplier = 1;
   }
 
   render({
@@ -493,11 +528,22 @@ export class GuiSpellcasting {
 
   get hexSize() {
     const baseScale = Math.sqrt((this.width * this.height) / 512);
-    return baseScale / this.settings.gridZoom;
+    return (
+      baseScale
+      / clamp(
+        this.settings.gridZoom * this.zoomMultiplier,
+        MIN_GRID_ZOOM,
+        MAX_GRID_ZOOM,
+      )
+    );
   }
 
   get coordsOffset() {
-    return new Vec2(this.width * 0.5, this.height * 0.5).add(this.panOffset);
+    return this.coordsOffsetWithoutPan.add(this.panOffset);
+  }
+
+  get coordsOffsetWithoutPan() {
+    return new Vec2(this.width * 0.5, this.height * 0.5);
   }
 
   coordToPx(coord: HexCoord) {

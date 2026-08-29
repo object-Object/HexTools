@@ -7,6 +7,7 @@ import {
 import {
   IconArrowBackUp,
   IconArrowForwardUp,
+  IconFocusCentered,
   IconMenu2,
   IconTrash,
 } from "@tabler/icons-react";
@@ -26,6 +27,7 @@ export interface StaffGridControlsProps
   patterns: readonly ResolvedPattern[];
   patternsHandlers: UseStateHistoryHandlers<readonly ResolvedPattern[]>;
   patternsHistory: UseStateHistoryValue<readonly ResolvedPattern[]>;
+  onResetPanAndZoom: () => unknown;
 }
 
 export default function StaffGridControls({
@@ -37,6 +39,7 @@ export default function StaffGridControls({
   settings,
   onSettingsChange,
   onResetSettings,
+  onResetPanAndZoom,
 }: StaffGridControlsProps) {
   const [sidebarOpen, { toggle: toggleSidebar, close: closeSidebar }] =
     useDisclosure(false);
@@ -83,6 +86,10 @@ export default function StaffGridControls({
           disabled={patterns.length === 0}
         >
           <IconTrash />
+        </ActionIcon>
+
+        <ActionIcon {...staffGridButtonProps} onClick={onResetPanAndZoom}>
+          <IconFocusCentered />
         </ActionIcon>
       </Stack>
 

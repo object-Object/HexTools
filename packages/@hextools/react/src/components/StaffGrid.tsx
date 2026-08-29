@@ -24,6 +24,7 @@ export interface StaffGridProps {
 
 export interface StaffGridRef {
   cancelPattern: () => void;
+  resetPanAndZoom: () => void;
   setZappyMultiplier: (value: number) => void;
 }
 
@@ -41,13 +42,17 @@ export function StaffGrid({
   const mouseYRef = useRef(0);
   const isCtrlDownRef = useRef(false);
   const zappyMultiplierRef = useRef(1);
-  const activePointerEventsRef = useRef<React.PointerEvent[]>([]);
+  const activePointerEvents = useRef<React.PointerEvent[]>([]).current;
+  const prevPointerDistanceRef = useRef(0);
 
   useImperativeHandle(
     ref,
     () => ({
       cancelPattern: () => {
         guiRef.current?.mouseCanceled();
+      },
+      resetPanAndZoom: () => {
+        guiRef.current?.resetPanAndZoom();
       },
       setZappyMultiplier: (value) => {
         zappyMultiplierRef.current = value;
@@ -65,8 +70,8 @@ export function StaffGrid({
   };
 
   const handlePointerDown = (event: React.PointerEvent) => {
-    activePointerEventsRef.current.push(event);
-    if (updateMouseRefs(event)) {
+    activePointerEvents.push(event);
+    if (updateMouseRefs(event) && !(event.buttons & MIDDLE_MOUSE_BUTTON)) {
       guiRef.current?.mouseClicked({
         mouseX: mouseXRef.current,
         mouseY: mouseYRef.current,
@@ -77,9 +82,44 @@ export function StaffGrid({
   };
 
   const handlePointerMove = (event: React.PointerEvent) => {
+    // zoom
+    const index = activePointerEvents.findIndex(
+      ({ pointerId }) => pointerId === event.pointerId,
+    );
+    if (index > -1) {
+      activePointerEvents[index] = event;
+    }
+
+    if (activePointerEvents.length === 2) {
+      const [event1, event2] = activePointerEvents;
+      const currentDistance = Math.hypot(
+        event1.clientX - event2.clientX,
+        event1.clientY - event2.clientY,
+      );
+      const prevDistance = prevPointerDistanceRef.current;
+      prevPointerDistanceRef.current = currentDistance;
+
+      if (canvasRef.current && prevDistance > 0 && currentDistance > 0) {
+        const rect = canvasRef.current.getBoundingClientRect();
+        guiRef.current?.mouseZoomed({
+          mousePos: {
+            mouseX: (event1.clientX + event2.clientX) / 2 - rect.left,
+            mouseY: (event1.clientY + event2.clientY) / 2 - rect.top,
+          },
+          // If current > prev, the distance has increased, so we're zooming in, so grid zoom should decrease
+          zoomMultiplier: prevDistance / currentDistance,
+        });
+      }
+    } else {
+      prevPointerDistanceRef.current = 0;
+    }
+
+    // pan
     if (updateMouseRefs(event)) {
-      // 4 = middle click
-      if (activePointerEventsRef.current.length > 1 || event.buttons & 4) {
+      if (
+        activePointerEvents.length === 2
+        || event.buttons & MIDDLE_MOUSE_BUTTON
+      ) {
         guiRef.current?.mousePanned({
           mouseX: event.movementX,
           mouseY: event.movementY,
@@ -99,11 +139,15 @@ export function StaffGrid({
   };
 
   const removePointerEvent = (event: React.PointerEvent) => {
-    const index = activePointerEventsRef.current.findIndex(
+    // zoom
+    prevPointerDistanceRef.current = 0;
+
+    // pan
+    const index = activePointerEvents.findIndex(
       ({ pointerId }) => pointerId === event.pointerId,
     );
     if (index > -1) {
-      activePointerEventsRef.current.splice(index, 1);
+      activePointerEvents.splice(index, 1);
     }
   };
 
@@ -118,6 +162,18 @@ export function StaffGrid({
     removePointerEvent(event);
     if (updateMouseRefs(event)) {
       guiRef.current?.mouseCanceled();
+    }
+  };
+
+  const handleWheel = (event: React.WheelEvent) => {
+    if (event.deltaY !== 0) {
+      guiRef.current?.mouseZoomed({
+        mousePos: {
+          mouseX: mouseXRef.current,
+          mouseY: mouseYRef.current,
+        },
+        zoomMultiplier: 1 + event.deltaY * 0.001,
+      });
     }
   };
 
@@ -214,6 +270,7 @@ export function StaffGrid({
         onPointerMove={handlePointerMove}
         onPointerUp={handlePointerUp}
         onPointerCancel={handlePointerCancel}
+        onWheel={handleWheel}
         style={{
           width: "100%",
           height: "100%",
@@ -238,3 +295,5 @@ function maybeResizeCanvas(
     gl.viewport(0, 0, canvas.width, canvas.height);
   }
 }
+
+const MIDDLE_MOUSE_BUTTON = 4;

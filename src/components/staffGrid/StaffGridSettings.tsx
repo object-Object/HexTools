@@ -14,7 +14,11 @@ import { IconChevronRight, IconSettings } from "@tabler/icons-react";
 import { ControlledNumberInput } from "@hextools/react";
 import { useRequestDeviceMotionPermission } from "@hextools/react";
 import { mod } from "@hextools/renderer";
-import type { GuiSpellcastingSettings } from "@hextools/renderer/staffGrid";
+import {
+  MAX_GRID_ZOOM,
+  MIN_GRID_ZOOM,
+  type GuiSpellcastingSettings,
+} from "@hextools/renderer/staffGrid";
 
 import type { KeysOfValue } from "../../utils/types";
 import { staffGridButtonProps } from "./StaffGrid.lib";
@@ -105,7 +109,8 @@ export default function StaffGridSettings({
             value={gridZoom}
             onChange={getSetter("gridZoom")}
             allowNegative={false}
-            min={0.25}
+            min={MIN_GRID_ZOOM}
+            max={MAX_GRID_ZOOM}
             step={0.25}
           />
 

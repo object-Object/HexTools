@@ -64,6 +64,10 @@ export default function StaffGridPage() {
     },
   });
 
+  const onResetPanAndZoom = () => {
+    staffGridRef.current?.resetPanAndZoom();
+  };
+
   return (
     <>
       <StaffGrid
@@ -84,6 +88,7 @@ export default function StaffGridPage() {
         settings={settings}
         onSettingsChange={setSettings}
         onResetSettings={() => setSettings(defaultSettings)}
+        onResetPanAndZoom={onResetPanAndZoom}
       />
     </>
   );
