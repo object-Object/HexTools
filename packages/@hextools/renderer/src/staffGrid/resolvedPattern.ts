@@ -5,6 +5,8 @@ export interface ResolvedPattern {
   pattern: HexPattern;
   origin: HexCoord;
   type: ResolvedPatternType;
+  /** If provided, overrides the default display in the sidebar. */
+  name?: string;
 }
 
 export interface ResolvedPatternType {

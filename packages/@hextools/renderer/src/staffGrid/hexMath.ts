@@ -112,6 +112,15 @@ export enum HexAngle {
   LEFT,
 }
 
+const letterToAngle: Record<string, HexAngle> = {
+  w: HexAngle.FORWARD,
+  e: HexAngle.RIGHT,
+  d: HexAngle.RIGHT_BACK,
+  s: HexAngle.BACK,
+  a: HexAngle.LEFT_BACK,
+  q: HexAngle.LEFT,
+};
+
 const angleToLetter: Record<HexAngle, string> = {
   [HexAngle.FORWARD]: "w",
   [HexAngle.RIGHT]: "e",
@@ -129,6 +138,13 @@ export class HexPattern {
     public readonly angles: readonly HexAngle[] = [],
   ) {
     this.signature = this.angles.map((angle) => angleToLetter[angle]).join("");
+  }
+
+  static fromSignature(startDir: HexDir, signature: string): HexPattern {
+    return new HexPattern(
+      startDir,
+      Array.from(signature).map((letter) => letterToAngle[letter]),
+    );
   }
 
   tryAppendDir(newDir: HexDir): HexPattern | null {

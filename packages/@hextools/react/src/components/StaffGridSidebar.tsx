@@ -121,6 +121,7 @@ export function StaffGridSidebar({
               id={HexCoord.toString(pattern.origin)}
               index={index}
               pattern={pattern.pattern}
+              name={pattern.name ?? null}
               onPan={() => {
                 onPanToPattern(pattern);
                 onClose();

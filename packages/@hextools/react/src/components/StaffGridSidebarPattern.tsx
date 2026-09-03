@@ -13,6 +13,7 @@ export interface StaffGridSidebarPatternProps {
   id: string;
   index: number;
   pattern: HexPattern;
+  name: string | null;
   onPan: () => unknown;
   onDelete: () => unknown;
 }
@@ -21,12 +22,13 @@ export function StaffGridSidebarPattern({
   id,
   index,
   pattern,
+  name,
   onPan,
   onDelete,
 }: StaffGridSidebarPatternProps) {
   const { ref, handleRef, isDragging } = useSortable({ id, index });
 
-  const text = pattern.toString();
+  const text = name ?? pattern.toString();
   return (
     <Group ref={ref} align="center" wrap="nowrap" gap="sm">
       <IconGripVertical
@@ -41,6 +43,7 @@ export function StaffGridSidebarPattern({
           overflow: "hidden",
           textOverflow: "ellipsis",
         }}
+        title={text}
       >
         {text}
       </Text>
