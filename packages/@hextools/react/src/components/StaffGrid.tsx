@@ -18,6 +18,7 @@ export interface StaffGridProps {
   onPatternsChange: (patterns: readonly ResolvedPattern[]) => unknown;
   patternType: ResolvedPatternType;
   onPatternTypeChange: (type: NamedResolvedPatternType) => unknown;
+  onPatternDrawn?: (drawTimeMs: number) => unknown;
   settings: GuiSpellcastingSettings;
   ref?: React.Ref<StaffGridRef>;
 }
@@ -34,6 +35,7 @@ export function StaffGrid({
   onPatternsChange,
   patternType,
   onPatternTypeChange,
+  onPatternDrawn,
   settings,
   ref,
 }: StaffGridProps) {
@@ -206,6 +208,7 @@ export function StaffGrid({
       onPatternsChange,
       patternType,
       onPatternTypeChange,
+      onPatternDrawn,
     });
     guiRef.current = gui;
 
@@ -248,8 +251,15 @@ export function StaffGrid({
       guiRef.current.onPatternsChange = onPatternsChange;
       guiRef.current.patternType = patternType;
       guiRef.current.onPatternTypeChange = onPatternTypeChange;
+      guiRef.current.onPatternDrawn = onPatternDrawn;
     }
-  }, [settings, onPatternsChange, patternType, onPatternTypeChange]);
+  }, [
+    settings,
+    onPatternsChange,
+    patternType,
+    onPatternTypeChange,
+    onPatternDrawn,
+  ]);
 
   useEffect(() => {
     guiRef.current?.setPatterns(patterns, false);

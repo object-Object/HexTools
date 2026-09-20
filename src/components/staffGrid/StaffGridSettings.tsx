@@ -48,6 +48,7 @@ export default function StaffGridSettings({
     shakeAction,
     enableEditingPatterns,
     autoPatternType,
+    showDrawTime,
   } = settings;
 
   const [opened, { open, close }] = useDisclosure(false);
@@ -158,6 +159,12 @@ export default function StaffGridSettings({
             label="Automatically Set Pattern Color"
             checked={autoPatternType}
             onChange={getSwitchSetter("autoPatternType")}
+          />
+
+          <Switch
+            label="Show Draw Time"
+            checked={showDrawTime}
+            onChange={getSwitchSetter("showDrawTime")}
           />
 
           <InputWrapper

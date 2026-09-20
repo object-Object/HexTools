@@ -13,6 +13,7 @@ import {
 } from "@hextools/renderer/staffGrid";
 
 import StaffGridControls from "./StaffGridControls";
+import StaffGridTimer from "./StaffGridTimer";
 
 export default function StaffGridPage() {
   const isTouchscreen = useIsTouchscreen();
@@ -22,6 +23,9 @@ export default function StaffGridPage() {
   >([]);
 
   const [patternType, setPatternType] = useState(DEFAULT_PATTERN_TYPE);
+
+  const [drawTimeMs, setDrawTimeMs] = useState<number | null>(null);
+  const [prevDrawTimeMs, setPrevDrawTimeMs] = useState<number | null>(null);
 
   const staffGridRef = useRef<StaffGridRef>(null);
 
@@ -72,6 +76,11 @@ export default function StaffGridPage() {
     staffGridRef.current?.resetPanAndZoom();
   };
 
+  const onPatternDrawn = (newDrawTimeMs: number) => {
+    setDrawTimeMs(newDrawTimeMs);
+    setPrevDrawTimeMs(drawTimeMs);
+  };
+
   return (
     <>
       <StaffGrid
@@ -79,9 +88,17 @@ export default function StaffGridPage() {
         onPatternsChange={patternsHandlers.set}
         patternType={patternType}
         onPatternTypeChange={setPatternType}
+        onPatternDrawn={onPatternDrawn}
         settings={settings}
         ref={staffGridRef}
       />
+
+      {settings.showDrawTime && (
+        <StaffGridTimer
+          drawTimeMs={drawTimeMs}
+          prevDrawTimeMs={prevDrawTimeMs}
+        />
+      )}
 
       <StaffGridControls
         patterns={patterns}

@@ -36,6 +36,7 @@ export interface GuiSpellcastingSettings {
   shakeAction: "none" | "undo" | "clear";
   enableEditingPatterns: boolean;
   autoPatternType: boolean;
+  showDrawTime: boolean;
 }
 
 export const MIN_GRID_ZOOM = 0.25;
@@ -48,11 +49,13 @@ export class GuiSpellcasting {
   patternType: ResolvedPatternType;
   onPatternsChange?: (resolvedPatterns: readonly ResolvedPattern[]) => unknown;
   onPatternTypeChange?: (type: NamedResolvedPatternType) => unknown;
+  onPatternDrawn?: (drawTimeMs: number) => unknown;
 
   private shader: PositionColorShader;
   private buf: BufferBuilder;
 
   private drawState: PatternDrawState = BETWEEN_PATTERNS;
+  private drawStartTime: number | null = null;
   /** Map from stringified coord to index in this.patterns */
   private usedSpots = new Map<string, number>();
   private patterns: readonly ResolvedPattern[] = [];
@@ -67,6 +70,7 @@ export class GuiSpellcasting {
     patternType,
     onPatternsChange,
     onPatternTypeChange,
+    onPatternDrawn,
     patterns,
   }: Pick<
     GuiSpellcasting,
@@ -75,6 +79,7 @@ export class GuiSpellcasting {
     | "patternType"
     | "onPatternsChange"
     | "onPatternTypeChange"
+    | "onPatternDrawn"
   > & {
     patterns: readonly ResolvedPattern[];
   }) {
@@ -83,6 +88,7 @@ export class GuiSpellcasting {
     this.patternType = patternType;
     this.onPatternsChange = onPatternsChange;
     this.onPatternTypeChange = onPatternTypeChange;
+    this.onPatternDrawn = onPatternDrawn;
     this.setPatterns(patterns, false);
 
     gl.clearColor(0, 0, 0, 0);
@@ -169,6 +175,7 @@ export class GuiSpellcasting {
     const mx = clamp(mouseX, 0, this.width);
     const my = clamp(mouseY, 0, this.height);
     if (this.drawState.type === "betweenPatterns") {
+      this.drawStartTime = null;
       const mouseCoord = this.pxToCoord(new Vec2(mx, my));
       const usedIndex = this.usedSpots.get(HexCoord.toString(mouseCoord));
       if (usedIndex === undefined) {
@@ -177,6 +184,7 @@ export class GuiSpellcasting {
           origin: mouseCoord,
           editedPattern: null,
         };
+        this.drawStartTime = performance.now();
       } else if (this.settings.enableEditingPatterns) {
         const resolvedPattern = this.patterns[usedIndex];
         const { pattern, origin } = resolvedPattern;
@@ -333,14 +341,19 @@ export class GuiSpellcasting {
             origin,
             type: this.patternType,
           });
+          if (this.drawStartTime !== null) {
+            this.onPatternDrawn?.(performance.now() - this.drawStartTime);
+          }
         }
         break;
       }
     }
+    this.drawStartTime = null;
   }
 
   mouseCanceled() {
     this.drawState = BETWEEN_PATTERNS;
+    this.drawStartTime = null;
   }
 
   mousePanned(rawMouseDelta: MousePos) {
@@ -643,6 +656,7 @@ export class GuiSpellcasting {
       zappyOnShake: false,
       enableEditingPatterns: true,
       autoPatternType: true,
+      showDrawTime: false,
     };
   }
 }
