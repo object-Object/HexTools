@@ -22,11 +22,13 @@ import { staffGridButtonProps } from "./StaffGrid.lib";
 export interface StaffGridPaletteProps {
   patternType: NamedResolvedPatternType;
   onPatternTypeChange: (patternType: NamedResolvedPatternType) => unknown;
+  disabled?: boolean;
 }
 
 export default function StaffGridPalette({
   patternType,
   onPatternTypeChange,
+  disabled,
 }: StaffGridPaletteProps) {
   const combobox = useCombobox();
 
@@ -70,6 +72,7 @@ export default function StaffGridPalette({
         <ActionIcon
           {...staffGridButtonProps}
           onClick={() => combobox.toggleDropdown()}
+          disabled={disabled}
         >
           <IconPalette color={RGBColor.toCSS(patternType.color)} />
         </ActionIcon>

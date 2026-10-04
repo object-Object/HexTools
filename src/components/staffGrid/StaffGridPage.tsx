@@ -8,10 +8,12 @@ import { useLocalStorageObject } from "@hextools/react";
 import {
   DEFAULT_PATTERN_TYPE,
   GuiSpellcasting,
-  type GuiSpellcastingSettings,
+  HexCoord,
+  PATTERN_TYPES,
   type ResolvedPattern,
 } from "@hextools/renderer/staffGrid";
 
+import type { HexToolsGridSettings } from "./StaffGrid.lib";
 import StaffGridControls from "./StaffGridControls";
 import StaffGridTimer from "./StaffGridTimer";
 
@@ -22,6 +24,11 @@ export default function StaffGridPage() {
     readonly ResolvedPattern[]
   >([]);
 
+  // HACK
+  const latestPatternsRef = useRef(patterns);
+  // eslint-disable-next-line react-hooks/refs
+  latestPatternsRef.current = patterns;
+
   const [patternType, setPatternType] = useState(DEFAULT_PATTERN_TYPE);
 
   const [drawTimeMs, setDrawTimeMs] = useState<number | null>(null);
@@ -29,15 +36,27 @@ export default function StaffGridPage() {
 
   const staffGridRef = useRef<StaffGridRef>(null);
 
-  const defaultSettings = GuiSpellcasting.getDefaultSettings({
-    isTouchscreen,
+  const defaultSettings: HexToolsGridSettings = {
+    ...GuiSpellcasting.getDefaultSettings({
+      isTouchscreen,
+    }),
+    dynamicResolutionURL: null,
+  };
+
+  const [settings, setSettings] = useLocalStorageObject<HexToolsGridSettings>({
+    key: "staff-grid-settings",
+    defaultValue: defaultSettings,
   });
 
-  const [settings, setSettings] =
-    useLocalStorageObject<GuiSpellcastingSettings>({
-      key: "staff-grid-settings",
-      defaultValue: defaultSettings,
-    });
+  const hasDynamicResolutionURL = settings.dynamicResolutionURL != null;
+  const [prevHasDynamicResolutionURL, setPrevHasDynamicResolutionURL] =
+    useState(hasDynamicResolutionURL);
+  if (hasDynamicResolutionURL !== prevHasDynamicResolutionURL) {
+    setPrevHasDynamicResolutionURL(hasDynamicResolutionURL);
+    setPatternType(
+      hasDynamicResolutionURL ? PATTERN_TYPES.Unresolved : DEFAULT_PATTERN_TYPE,
+    );
+  }
 
   useHotkeys([
     ["Escape", () => staffGridRef.current?.cancelPattern()],
@@ -76,9 +95,34 @@ export default function StaffGridPage() {
     staffGridRef.current?.resetPanAndZoom();
   };
 
-  const onPatternDrawn = (newDrawTimeMs: number) => {
+  const onPatternDrawn = async (
+    pattern: ResolvedPattern,
+    newDrawTimeMs: number,
+  ) => {
     setDrawTimeMs(newDrawTimeMs);
     setPrevDrawTimeMs(drawTimeMs);
+    if (settings.dynamicResolutionURL != null) {
+      const url = new URL("/resolve", settings.dynamicResolutionURL);
+      url.searchParams.append("signature", pattern.pattern.signature);
+      const response = await fetch(url, {
+        method: "POST",
+      });
+
+      const rawType = (await response.json()) as string;
+      const type =
+        rawType in resolveResponseToType
+          ? resolveResponseToType[rawType as keyof typeof resolveResponseToType]
+          : PATTERN_TYPES.Unresolved;
+
+      patternsHandlers.set(
+        latestPatternsRef.current.map((other) =>
+          HexCoord.equals(pattern.origin, other.origin)
+          && pattern.pattern.signature === other.pattern.signature
+            ? { ...other, type }
+            : other,
+        ),
+      );
+    }
   };
 
   return (
@@ -115,3 +159,12 @@ export default function StaffGridPage() {
     </>
   );
 }
+
+const resolveResponseToType = {
+  unresolved: PATTERN_TYPES.Unresolved,
+  evaluated: PATTERN_TYPES.Evaluated,
+  escaped: PATTERN_TYPES.Escaped,
+  undone: PATTERN_TYPES.Undone,
+  errored: PATTERN_TYPES.Errored,
+  invalid: PATTERN_TYPES.Invalid,
+};

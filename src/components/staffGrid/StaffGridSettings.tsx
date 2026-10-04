@@ -7,6 +7,7 @@ import {
   SegmentedControl,
   Stack,
   Switch,
+  TextInput,
 } from "@mantine/core";
 import { useDisclosure, useMediaQuery } from "@mantine/hooks";
 import { IconChevronRight, IconSettings } from "@tabler/icons-react";
@@ -14,19 +15,18 @@ import { IconChevronRight, IconSettings } from "@tabler/icons-react";
 import { ControlledNumberInput } from "@hextools/react";
 import { useRequestDeviceMotionPermission } from "@hextools/react";
 import { mod } from "@hextools/renderer";
-import {
-  MAX_GRID_ZOOM,
-  MIN_GRID_ZOOM,
-  type GuiSpellcastingSettings,
-} from "@hextools/renderer/staffGrid";
+import { MAX_GRID_ZOOM, MIN_GRID_ZOOM } from "@hextools/renderer/staffGrid";
 
 import type { KeysOfValue } from "../../utils/types";
-import { staffGridButtonProps } from "./StaffGrid.lib";
+import {
+  staffGridButtonProps,
+  type HexToolsGridSettings,
+} from "./StaffGrid.lib";
 import styles from "./StaffGridSettings.module.css";
 
 export interface StaffGridSettingsProps {
-  settings: GuiSpellcastingSettings;
-  onSettingsChange: (value: GuiSpellcastingSettings) => unknown;
+  settings: HexToolsGridSettings;
+  onSettingsChange: (value: HexToolsGridSettings) => unknown;
   onResetSettings: () => unknown;
 }
 
@@ -49,6 +49,7 @@ export default function StaffGridSettings({
     enableEditingPatterns,
     autoPatternType,
     showDrawTime,
+    dynamicResolutionURL,
   } = settings;
 
   const [opened, { open, close }] = useDisclosure(false);
@@ -63,16 +64,16 @@ export default function StaffGridSettings({
     ? "Device motion permission denied :("
     : null;
 
-  function getSetter<T extends keyof GuiSpellcastingSettings>(
+  function getSetter<T extends keyof HexToolsGridSettings>(
     key: T,
-  ): (value: GuiSpellcastingSettings[T]) => unknown {
+  ): (value: HexToolsGridSettings[T]) => unknown {
     return (value) => {
       onSettingsChange({ ...settings, [key]: value });
     };
   }
 
   function getSwitchSetter<
-    T extends KeysOfValue<GuiSpellcastingSettings, boolean>,
+    T extends KeysOfValue<HexToolsGridSettings, boolean>,
   >(key: T): (event: React.ChangeEvent<HTMLInputElement>) => unknown {
     const setter = getSetter(key);
     return (event) => {
@@ -153,12 +154,14 @@ export default function StaffGridSettings({
             label="Click To Edit Patterns"
             checked={enableEditingPatterns}
             onChange={getSwitchSetter("enableEditingPatterns")}
+            disabled={dynamicResolutionURL != null}
           />
 
           <Switch
             label="Automatically Set Pattern Color"
             checked={autoPatternType}
             onChange={getSwitchSetter("autoPatternType")}
+            disabled={dynamicResolutionURL != null}
           />
 
           <Switch
@@ -234,6 +237,21 @@ export default function StaffGridSettings({
                     min={1}
                   />
                 )}
+
+                <TextInput
+                  label="Dynamic Pattern Resolution URL"
+                  description="When set, all drawn patterns are sent to the /resolve endpoint of this URL to determine the pattern's color."
+                  placeholder="http://127.0.0.1:8000"
+                  value={dynamicResolutionURL ?? ""}
+                  onChange={(event) =>
+                    onSettingsChange({
+                      ...settings,
+                      dynamicResolutionURL: event.currentTarget.value || null,
+                      autoPatternType: false,
+                      enableEditingPatterns: false,
+                    })
+                  }
+                />
 
                 <Button
                   mt="md"

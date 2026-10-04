@@ -48,6 +48,8 @@ export default function StaffGridControls({
   const [sidebarOpen, { toggle: toggleSidebar, close: closeSidebar }] =
     useDisclosure(false);
 
+  const hasDynamicResolutionURL = settings.dynamicResolutionURL != null;
+
   return (
     <>
       <Stack gap="xs" pos="absolute" top={16} right={16}>
@@ -64,12 +66,13 @@ export default function StaffGridControls({
         <StaffGridPalette
           patternType={patternType}
           onPatternTypeChange={onPatternTypeChange}
+          disabled={hasDynamicResolutionURL}
         />
 
         <ActionIcon
           {...staffGridButtonProps}
           onClick={() => patternsHandlers.back()}
-          disabled={patternsHistory.current === 0}
+          disabled={patternsHistory.current === 0 || hasDynamicResolutionURL}
         >
           <IconArrowBackUp />
         </ActionIcon>
@@ -79,6 +82,7 @@ export default function StaffGridControls({
           onClick={() => patternsHandlers.forward()}
           disabled={
             patternsHistory.current === patternsHistory.history.length - 1
+            || hasDynamicResolutionURL
           }
         >
           <IconArrowForwardUp />

@@ -18,7 +18,7 @@ export interface StaffGridProps {
   onPatternsChange: (patterns: readonly ResolvedPattern[]) => unknown;
   patternType: ResolvedPatternType;
   onPatternTypeChange: (type: NamedResolvedPatternType) => unknown;
-  onPatternDrawn?: (drawTimeMs: number) => unknown;
+  onPatternDrawn?: (pattern: ResolvedPattern, drawTimeMs: number) => unknown;
   settings: GuiSpellcastingSettings;
   ref?: React.Ref<StaffGridRef>;
 }

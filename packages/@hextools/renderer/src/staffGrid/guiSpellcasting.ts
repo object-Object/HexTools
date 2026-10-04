@@ -49,7 +49,7 @@ export class GuiSpellcasting {
   patternType: ResolvedPatternType;
   onPatternsChange?: (resolvedPatterns: readonly ResolvedPattern[]) => unknown;
   onPatternTypeChange?: (type: NamedResolvedPatternType) => unknown;
-  onPatternDrawn?: (drawTimeMs: number) => unknown;
+  onPatternDrawn?: (pattern: ResolvedPattern, drawTimeMs: number) => unknown;
 
   private shader: PositionColorShader;
   private buf: BufferBuilder;
@@ -336,13 +336,17 @@ export class GuiSpellcasting {
             true,
           );
         } else {
-          this.addPattern({
+          const pattern: ResolvedPattern = {
             pattern: wipPattern,
             origin,
             type: this.patternType,
-          });
+          };
+          this.addPattern(pattern);
           if (this.drawStartTime !== null) {
-            this.onPatternDrawn?.(performance.now() - this.drawStartTime);
+            this.onPatternDrawn?.(
+              pattern,
+              performance.now() - this.drawStartTime,
+            );
           }
         }
         break;
